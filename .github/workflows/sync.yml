@@ -1,0 +1,46 @@
+name: Sync calculator data
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: calculator-data-sync
+  cancel-in-progress: false
+
+jobs:
+  sync-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install parser dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Build data.json from Google Sheets
+        env:
+          GOOGLE_SHEETS_XLSX_URL: ${{ secrets.GOOGLE_SHEETS_XLSX_URL }}
+        run: python sync_data.py
+
+      - name: Commit changed calculator data
+        run: |
+          if git diff --quiet -- data.json; then
+            echo "No data change to commit."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data.json
+          git commit -m 'chore: sync calculator data [skip ci]'
+          git push

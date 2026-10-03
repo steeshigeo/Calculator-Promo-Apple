@@ -8,7 +8,8 @@ Alur (sama dengan Dashtp3staff):
 Sumber file diambil dari environment variable ONEDRIVE_URL (diisi dari GitHub Secret
 ONEDRIVE_DIRECT_URL). Link yang didukung:
     - direct link .xlsx (OneDrive / SharePoint / hosting lain)
-    - link share OneDrive (1drv.ms / onedrive.live.com)  -> otomatis diubah jadi link unduh
+    - link share OneDrive (1drv.ms / onedrive.live.com / SharePoint)  -> dicoba beberapa cara unduh;
+      link HARUS dibuka untuk umum ('Siapa saja yang memiliki link' - Dapat melihat)
     - link Google Sheets (docs.google.com/spreadsheets/d/...)  -> otomatis di-export ke xlsx
 
 Pemakaian lokal (tanpa download):
@@ -31,6 +32,7 @@ import os
 import re
 import sys
 from datetime import date, datetime, timedelta, timezone
+from urllib.parse import urlparse
 
 import requests
 from openpyxl import load_workbook
@@ -130,34 +132,84 @@ def normalize_bank(s):
 
 
 # --------------------------------------------------------------------------- download
-def direct_url(url):
+UA = {"User-Agent": "Mozilla/5.0 (kalkulator-promo-sync)"}
+
+
+def host_of(u):
+    return urlparse(u).netloc.lower()
+
+
+def add_download(u):
+    if "download=1" in u:
+        return u
+    return u + ("&" if "?" in u else "?") + "download=1"
+
+
+def candidate_urls(url):
+    """Daftar alamat unduh yang dicoba berurutan untuk satu link master."""
     u = url.strip()
     m = re.match(r"https://docs\.google\.com/spreadsheets/d/([\w-]+)", u)
     if m:
-        return f"https://docs.google.com/spreadsheets/d/{m.group(1)}/export?format=xlsx"
-    if re.match(r"https?://(1drv\.ms|onedrive\.live\.com)/", u):
+        return [f"https://docs.google.com/spreadsheets/d/{m.group(1)}/export?format=xlsx"]
+    host = host_of(u)
+    if host == "1drv.ms" or host.endswith("onedrive.live.com"):
         b64 = base64.urlsafe_b64encode(u.encode()).decode().rstrip("=")
-        return f"https://api.onedrive.com/v1.0/shares/u!{b64}/root/content"
-    if "sharepoint.com" in u and "download=1" not in u:
-        return u + ("&" if "?" in u else "?") + "download=1"
-    return u
+        return [f"https://api.onedrive.com/v1.0/shares/u!{b64}/root/content", add_download(u)]
+    if host.endswith("sharepoint.com"):
+        return [add_download(u)]
+    return [u]
+
+
+def sharing_hint(host):
+    if host.endswith("sharepoint.com") or host == "1drv.ms" or host.endswith("onedrive.live.com"):
+        return (
+            "Penyebab paling umum: link tidak terbuka untuk umum. Di OneDrive buka file master -> Bagikan -> "
+            "Pengaturan link -> pilih 'Siapa saja yang memiliki link' dengan izin 'Dapat melihat' "
+            "(bukan 'Orang tertentu' / 'Orang di organisasi Anda'), lalu salin link BARU ke secret ONEDRIVE_DIRECT_URL. "
+            "Akun kantor/sekolah (SharePoint) sering memblokir link publik oleh admin; bila begitu, pakai link "
+            "Google Sheets atau direct link .xlsx dari hosting lain."
+        )
+    if "google" in host:
+        return "Pastikan Google Sheets dibagikan 'Siapa saja yang memiliki link' (Viewer)."
+    return "Pastikan link dapat dibuka tanpa login dan langsung mengunduh file .xlsx."
 
 
 def download(url):
-    r = requests.get(
-        direct_url(url),
-        timeout=90,
-        allow_redirects=True,
-        headers={"User-Agent": "Mozilla/5.0 (kalkulator-promo-sync)"},
+    """Unduh file master. Mencoba beberapa bentuk link; bila semua gagal, beri diagnosis (tanpa membocorkan URL)."""
+    s = requests.Session()
+    s.headers.update(UA)
+    queue = candidate_urls(url)
+    tried, resolved, i = [], False, 0
+    first_host = host_of(url)
+    while i < len(queue):
+        target = queue[i]
+        i += 1
+        try:
+            r = s.get(target, timeout=90, allow_redirects=True)
+        except requests.RequestException as e:
+            tried.append(f"{host_of(target)} -> gagal koneksi ({type(e).__name__})")
+            continue
+        if r.status_code == 200 and r.content[:2] == b"PK":
+            return r.content
+        landed = host_of(r.url)
+        note = f"{host_of(target)} -> HTTP {r.status_code}"
+        if r.status_code == 200:
+            note += " (bukan file xlsx, kemungkinan halaman login)"
+        if landed != host_of(target):
+            note += f", dialihkan ke {landed}"
+        tried.append(note)
+        # Link pendek 1drv.ms bisa mengarah ke SharePoint (akun kantor): coba alamat tujuan akhirnya.
+        if first_host == "1drv.ms" and not resolved:
+            resolved = True
+            try:
+                final = s.get(url.strip(), timeout=60, allow_redirects=True, stream=True).url
+                if host_of(final).endswith(("sharepoint.com", "onedrive.live.com")) and add_download(final) not in queue:
+                    queue.append(add_download(final))
+            except requests.RequestException:
+                pass
+    raise SheetError(
+        "Gagal mengunduh file master. Percobaan: " + "; ".join(tried) + ". " + sharing_hint(first_host)
     )
-    r.raise_for_status()
-    data = r.content
-    if data[:2] != b"PK":
-        raise SheetError(
-            "File yang terunduh bukan .xlsx (biasanya halaman login / izin akses). "
-            "Pastikan link dibagikan 'siapa saja yang memiliki link' dan formatnya .xlsx."
-        )
-    return data
 
 
 def read_sheets(raw):

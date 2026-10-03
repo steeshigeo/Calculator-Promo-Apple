@@ -49,11 +49,25 @@ Pesan umum:
 |---|---|
 | `Header sheet 'Price List' tidak ditemukan` | Nama kolom diubah. Butuh: SAP Article, SAPDescription, Category, Normal Price, Promotion Price |
 | `Sheet 'BNPL' tidak ditemukan` | Nama tab diubah. Nama tab harus persis: Price List, Promo Berjalan, BNPL, Provider, Qoala Protection, Trade in |
-| `File bukan .xlsx` / `bukan .xlsx (halaman login)` | Link tidak publik atau bukan file xlsx |
+| `Gagal mengunduh file master … HTTP 401/403` | Link OneDrive tidak terbuka untuk umum. Lihat "Link OneDrive ditolak (401)" di bawah |
+| `File bukan .xlsx` / `halaman login` | Link tidak publik atau bukan file xlsx |
 | `Jumlah produk turun drastis` | Sheet terpotong / terhapus sebagian; update ditolak |
 
 Di log run juga muncul **peringatan** (kuning) yang perlu dirapikan di sheet, misalnya varian yang harganya beda tapi
 label RAM/Storage sama (hanya satu yang bisa dipilih di kalkulator) dan promo yang periodenya sudah lewat.
+
+## Link OneDrive ditolak (401)
+
+GitHub Action berjalan tanpa login, jadi link master harus bisa dibuka **tanpa akun**:
+
+1. Buka file master di OneDrive → **Bagikan** → klik ikon pengaturan link.
+2. Pilih **Siapa saja yang memiliki link**, izin **Dapat melihat**. Pilihan "Orang tertentu" atau "Orang di organisasi Anda" akan selalu 401.
+3. **Salin link baru**, lalu ganti isi secret `ONEDRIVE_DIRECT_URL` (link lama tidak ikut berubah izinnya).
+4. Jalankan ulang *Run workflow*.
+
+Akun kantor/sekolah (SharePoint) sering memblokir "Siapa saja" oleh admin. Kalau pilihan itu tidak muncul, pakai link
+Google Sheets (dibagikan "Siapa saja yang memiliki link" → Viewer) di secret yang sama; script otomatis mengubahnya ke export xlsx.
+Log run akan menyebut host dan kode HTTP tiap percobaan (tanpa membuka isi link-nya).
 
 ## Aturan format master
 

@@ -1,0 +1,51 @@
+name: Sync Promo Data
+
+on:
+  schedule:
+    # Tiap 30 menit (cukup untuk kuota gratis repo privat). Jadwal GitHub bisa telat beberapa menit.
+    - cron: '*/30 * * * *'
+  workflow_dispatch: # Tombol "Run workflow" di tab Actions untuk update instan setelah mengubah file master
+
+permissions:
+  contents: write # supaya bot boleh commit data.json
+
+concurrency:
+  group: promo-sync
+  cancel-in-progress: false
+
+jobs:
+  sync-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Download & Parse Master Data
+        env:
+          ONEDRIVE_URL: ${{ secrets.ONEDRIVE_DIRECT_URL }}
+        run: |
+          python sync_onedrive.py
+
+      - name: Commit and Push Updated Data
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data.json
+          if git diff --staged --quiet; then
+            echo "Tidak ada perubahan data."
+          else
+            git commit -m "Auto-update promo data"
+            git push || (git pull --rebase && git push)
+          fi

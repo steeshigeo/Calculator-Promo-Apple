@@ -1,0 +1,15 @@
+{
+ "v": 1,
+ "iter": 150000,
+ "staff": {
+  "salt": "e83903fec661fcee63766b42eefaff62",
+  "hash": "59f9c814732b77ebe8fcce97f0aa5424e813e19daa3fae44ceab39c2fa01babf",
+  "v": "2026-10-04T00:00:00Z"
+ },
+ "admin": {
+  "salt": "8fcebdad6173df23167b375e98d22b04",
+  "hash": "c71cde2abe504a4f9e1da54d9b90c761755734cf88e82623a015b8c685cecf71",
+  "v": "2026-10-04T00:00:00Z"
+ },
+ "updated_at": "2026-10-04T00:00:00Z"
+}

@@ -19,6 +19,8 @@ index.html membaca data.json  (dicek ulang tiap 5 menit selama sesi aktif)
 | `data.json` | Hasil parsing master. **Jangan diedit manual**, akan ditimpa otomatis. |
 | `sync_onedrive.py` | Unduh master → validasi → tulis `data.json`. |
 | `.github/workflows/onedrive_sync.yml` | Jadwal otomatis + tombol manual. |
+| `access.json` | Hash password staff & admin (PBKDF2, tanpa password asli). **Upload sekali, jangan ditimpa lagi**; diubah otomatis lewat halaman Admin. |
+| `update_access.py` + `.github/workflows/access_update.yml` | Workflow "Update Access": menulis hash password baru ke `access.json`. |
 | `requirements.txt` | `openpyxl`, `requests`. |
 
 ## Pasang (sekali saja)
@@ -44,35 +46,42 @@ index.html membaca data.json  (dicek ulang tiap 5 menit selama sesi aktif)
 - Log Action sekarang memuat **laporan perubahan**: setiap harga yang berubah ditulis, mis.
   `[iPhone] iPhone 15 128GB Pink: promo Rp15.499.000 -> Rp9.999.000`, plus ringkasan jumlah. Bila log hanya menulis
   "Tidak ada perubahan data", artinya `data.json` sudah sama dengan file master saat itu.
-- **Jangan menimpa `data.json`** di repo saat meng-update file lain; file itu dibuat otomatis oleh Action.
+- **Jangan menimpa `data.json` dan `access.json`** di repo saat meng-update file lain; keduanya dibuat/diubah otomatis oleh Action.
 
-## Tombol Refresh = jalankan GitHub Actions
+## Menu, halaman, Run & Refresh
 
-Tombol **Refresh** di kalkulator menjalankan workflow `onedrive_sync.yml` (repo `steeshigeo/Calculator-Promo-Apple`), menunggu hasilnya,
-lalu memuat data baru otomatis. Alurnya:
+- **Sidebar (☰)**: Home (kalkulator, halaman awal), Guide (panduan pemakaian), About (deskripsi & manfaat untuk staff, dengan statistik data), Admin, pengaturan Tampilan (Auto/Terang/Gelap) dan Getaran, serta **Contributors**.
+- **Run (▶)**: memicu workflow `onedrive_sync.yml` (repo `steeshigeo/Calculator-Promo-Apple`) dan menampilkan popup
+  *"Sync in progress, wait ~20s then tap Refresh."* dengan hitung mundur di home (di teks status dan lencana tombol Refresh).
+  Bila sudah ada run yang berjalan, Run tidak memicu ganda. Jeda 45 detik antar-Run.
+- **Refresh (↻)**: memuat `data.json` terbaru ke kalkulator (berdenyut saat hitung mundur selesai). Bila belum berubah, tunggu ±1 menit
+  (deploy situs) lalu tap lagi.
+- Token GitHub dibaca dari **sel A2** Google Sheet token (lewat JSONP) dan hanya disimpan di memori halaman, tidak di storage.
 
-1. Token GitHub dibaca dari **sel A2** Google Sheet token (lewat JSONP, tidak disimpan di perangkat, hanya di memori halaman).
-2. Bila sudah ada run yang berjalan, tidak memicu run baru (hemat kuota menit).
-3. Bila belum: `workflow_dispatch` pada branch default, lalu cek status run tiap 4 detik.
-4. Run sukses dan `data.json` berubah: kalkulator menunggu situs ter-deploy lalu memuat data baru. Bila tidak ada perubahan: muncul "Data sudah yang terbaru".
-5. Jeda 45 detik antar-tap supaya tidak memboroskan kuota.
+**Token yang aman** (siapa pun yang memegang link Google Sheet token bisa membacanya):
 
-**Token yang aman** (penting, token ini bisa dibaca siapa pun yang memegang link Google Sheet-nya):
+- Pakai **fine-grained personal access token**, hanya repo `Calculator-Promo-Apple`, izin **Actions: Read and write** (Metadata: Read otomatis), dengan masa berlaku.
+- Dampak terburuk bila bocor: memicu workflow berulang (kuota menit), menghapus log run, **atau mereset password lewat workflow Update Access**.
+- Opsi lebih aman: pindahkan pemicu ke Vercel Serverless Function (token di Environment Variable, tidak sampai ke browser).
 
-- Buat **fine-grained personal access token** (GitHub → Settings → Developer settings), bukan classic token.
-- *Repository access*: hanya repo `Calculator-Promo-Apple`. *Permissions*: **Actions: Read and write** (Metadata: Read otomatis). Jangan beri izin lain.
-- Beri masa berlaku (mis. 90 hari) dan catat tanggalnya. Saat kedaluwarsa, ganti isi A2; kalkulator memuat token ulang otomatis.
-- Dampak terburuk bila token bocor: orang lain bisa memicu workflow berulang (menghabiskan kuota menit) atau menghapus log run. Isi repo dan secret tidak bisa dibaca/diubah dengan izin ini.
-- Opsi lebih aman: pindahkan pemicu ke Vercel Serverless Function (token disimpan di Environment Variable, tidak pernah sampai ke browser).
+## Password staff & admin (sinkron ke semua staff)
+
+- Password disimpan sebagai **hash PBKDF2-SHA256** (salt acak, 150.000 iterasi) di `access.json`, bukan teks biasa di kode. Semua perangkat membaca file yang sama.
+- **Awal pemasangan**: `access.json` berisi password lama (staff `maptech`, admin `digiceria`, username admin `MAPTECH`). Segera ganti lewat Admin.
+- **Mengganti**: sidebar → Admin → masukkan kredensial admin → isi password baru → *Terapkan ke semua staff*. Browser mengirim **hanya salt + hash**
+  ke workflow `Update Access`, yang meng-commit `access.json`. Dalam ±1–2 menit semua staff memakai password baru; staff yang sedang login diminta masuk ulang.
+- Password admin juga bisa dipakai untuk masuk sebagai staff (untuk pemulihan bila password staff terlupa).
+- Ini **gerbang ringan**, bukan keamanan data: `data.json` tetap bisa dibuka siapa pun yang tahu URL situsnya. Untuk pembatasan sungguhan pakai proteksi akses hosting (Vercel Password Protection / Cloudflare Access).
+- Butuh HTTPS (Vercel otomatis) karena pemeriksaan hash memakai Web Crypto.
 
 ## Tampilan & perangkat
 
-- Tombol bulan/matahari di header mengganti terang/gelap. Default mengikuti pengaturan perangkat; pilihan manual tersimpan di perangkat itu.
 - Desktop (layar ≥ 1100 px) memakai tata letak penuh dua kolom: kartu langkah di kiri, Rincian Simulasi dan Sales Talk menempel di kanan.
-- **Haptic** saat mengetuk tab iPhone / iPad / Apple Watch / Mac: Android Chrome memakai Vibration API; iPhone/iPad memakai trik `<input switch>` yang butuh Safari iOS 17.4+ dan ketukan langsung dari pengguna.
-  Desktop tidak bergetar. Bila perangkat tidak mendukung, tab tetap berfungsi normal.
-- Promo yang namanya memuat **Samsung** diabaikan (di `sync_onedrive.py`: `IGNORE_PROMO_KEYWORDS`, dan di `index.html` sebagai pengaman untuk data lama).
-- Dropdown Trade In menampilkan nama berhuruf kapital di awal (Samsung, Galaxy A54 5G); `iPhone` dan `iPad` ditulis khusus. Hanya tampilan, nilai asli di data tidak berubah.
+- **Getaran**: Android memakai Vibration API. **iOS: sejak iOS 26.5 Apple menambal getar lewat script**; yang masih berfungsi hanya sentuhan langsung ke switch asli.
+  Karena itu di iPhone/iPad kalkulator memasang switch `<input type="checkbox" switch>` transparan tepat di atas tab, menu, Run, dan Refresh, sehingga jari menyentuh switch itu.
+  Perlu **Settings → Sounds & Haptics → System Haptics** aktif. Saklar *Getaran* di sidebar memakai switch bawaan iOS, jadi mengetuknya sekaligus menjadi tes getar. Laptop/desktop tidak punya motor getar.
+- Promo yang namanya memuat **Samsung** diabaikan (`IGNORE_PROMO_KEYWORDS` di `sync_onedrive.py` dan `index.html`).
+- Dropdown Trade In menampilkan nama berhuruf kapital di awal (Samsung, Galaxy A54 5G); `iPhone` dan `iPad` ditulis khusus. Hanya tampilan.
 
 ## Cara update harga / promo
 
@@ -128,9 +137,8 @@ python -m http.server 8000                                  # buka http://localh
 
 ## Catatan keamanan
 
-Password kalkulator dan admin ada di dalam `index.html`, jadi hanya membatasi akses kasual, bukan pengaman data.
-Data di `data.json` bisa diakses siapa pun yang tahu URL situsnya. Bila perlu pembatasan sungguhan, aktifkan
-proteksi akses di hosting (mis. Vercel Password Protection atau Cloudflare Access).
+Lihat bagian *Password staff & admin* dan *Token yang aman* di atas. Ringkas: password hanya gerbang akses ringan, data harga tetap publik bagi yang tahu URL-nya,
+dan token GitHub di Google Sheet harus fine-grained dengan izin seminimal mungkin.
 
 ## Kuota GitHub Actions
 

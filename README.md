@@ -36,6 +36,16 @@ index.html membaca data.json  (dicek ulang tiap 5 menit selama sesi aktif)
 6. **Deploy**: import repo ke Vercel (atau Netlify / Cloudflare Pages). Setiap commit bot akan men-deploy ulang otomatis.
    Bila memakai GitHub Pages (repo privat butuh paket berbayar), cek setelah run pertama bahwa situs ikut ter-update.
 
+## Varian / Warna & laporan perubahan harga
+
+- Satu **tipe + storage** bisa punya banyak baris di sheet (warna, atau iPhone 15 vs iPhone 15 Plus yang berbagi judul). Kalkulator menampilkan dropdown
+  **Varian / Warna** berisi semua baris itu (dengan harganya bila berbeda), jadi harga di baris mana pun yang kamu ubah bisa dilihat dan dipilih.
+  Sales talk menyebut varian yang dipilih. Disarankan tetap menambah baris judul sendiri (mis. "iPhone 15 Plus") agar pilihan lebih ringkas.
+- Log Action sekarang memuat **laporan perubahan**: setiap harga yang berubah ditulis, mis.
+  `[iPhone] iPhone 15 128GB Pink: promo Rp15.499.000 -> Rp9.999.000`, plus ringkasan jumlah. Bila log hanya menulis
+  "Tidak ada perubahan data", artinya `data.json` sudah sama dengan file master saat itu.
+- **Jangan menimpa `data.json`** di repo saat meng-update file lain; file itu dibuat otomatis oleh Action.
+
 ## Tombol Refresh = jalankan GitHub Actions
 
 Tombol **Refresh** di kalkulator menjalankan workflow `onedrive_sync.yml` (repo `steeshigeo/Calculator-Promo-Apple`), menunggu hasilnya,

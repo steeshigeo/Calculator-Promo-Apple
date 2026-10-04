@@ -66,11 +66,13 @@ CARD_MATRIX = [
     ("Maybank", [3, 6, 12, 24]),
     ("Jenius (BTPN)", [3, 6, 12]),
     ("KB Bank", [3, 6, 12, 18, 24]),
-    ("BRI Samsung Card", [3, 6, 12, 18, 24]),
     ("BRI Debit", [3, 6, 12]),
     ("OCBC", [3, 6, 12]),
 ]
 DEFAULT_NEW_CARD_TENORS = [3, 6, 12]
+
+# Promo yang namanya memuat kata-kata ini diabaikan (tidak masuk data.json / deteksi promo bank).
+IGNORE_PROMO_KEYWORDS = ("samsung",)
 
 
 class SheetError(Exception):
@@ -503,7 +505,11 @@ def build(sheets, today, source_name, warnings):
         if name not in sheets:
             raise SheetError(f"Sheet '{name}' tidak ditemukan. Sheet yang ada: {', '.join(sheets)}")
     catalog = parse_price_list(sheets[SHEET_NAMES["price"]])
-    promos = parse_promos(sheets[SHEET_NAMES["promo"]], today)
+    promos_all = parse_promos(sheets[SHEET_NAMES["promo"]], today)
+    promos = [p for p in promos_all if not any(k in p["promo"].lower() for k in IGNORE_PROMO_KEYWORDS)]
+    ignored = len(promos_all) - len(promos)
+    if ignored:
+        warnings.append(f"{ignored} promo diabaikan karena nama promo memuat kata {IGNORE_PROMO_KEYWORDS}.")
     data = {
         "source_file": source_name,
         "catalog": catalog,

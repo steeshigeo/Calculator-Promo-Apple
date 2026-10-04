@@ -527,7 +527,15 @@ def build(sheets, today, source_name, warnings):
     for key in ("bnpl", "providers", "qoala", "trade_in", "promos"):
         if not data[key]:
             raise SheetError(f"Data '{key}' kosong setelah parsing.")
-    warnings.extend(find_label_collisions(catalog))
+    collisions = find_label_collisions(catalog)
+    if collisions:
+        warnings.append(
+            f"{len(collisions)} kelompok produk punya >1 varian dengan label RAM/Storage sama tetapi harga berbeda "
+            "(mis. warna / Plus / chip). Di kalkulator dipilih lewat dropdown 'Varian / Warna'. "
+            "Rinciannya: jalankan lokal dengan --verbose."
+        )
+        if os.environ.get("VERBOSE"):
+            warnings.extend(collisions)
     expired = [p for p in promos if p["end_date"] and p["end_date"] < today.isoformat()]
     if expired:
         warnings.append(
@@ -538,6 +546,52 @@ def build(sheets, today, source_name, warnings):
     if unreadable:
         warnings.append(f"{len(unreadable)} promo dengan Periode yang tidak terbaca tanggalnya (tetap ditampilkan).")
     return data
+
+
+def rp(n):
+    return "Rp" + f"{int(n):,}".replace(",", ".")
+
+
+def catalog_index(data):
+    out = {}
+    for tab, items in (data.get("catalog") or {}).items():
+        for p in items:
+            out[(tab, p["article"], p["description"])] = p
+    return out
+
+
+def diff_report(old, new, limit=40):
+    """Daftar perubahan harga produk antara data.json lama dan hasil sync ini."""
+    a, b = catalog_index(old), catalog_index(new)
+    changed, added = [], []
+    for k, p in b.items():
+        o = a.get(k)
+        if o is None:
+            added.append(f"[{k[0]}] {p['description']} (baru) promo {rp(p['promo_price'])}, normal {rp(p['normal_price'])}")
+            continue
+        bits = []
+        if o["promo_price"] != p["promo_price"]:
+            bits.append(f"promo {rp(o['promo_price'])} -> {rp(p['promo_price'])}")
+        if o["normal_price"] != p["normal_price"]:
+            bits.append(f"normal {rp(o['normal_price'])} -> {rp(p['normal_price'])}")
+        if bits:
+            changed.append(f"[{k[0]}] {p['description']}: " + ", ".join(bits))
+    removed = [f"[{k[0]}] {p['description']} (dihapus dari sheet)" for k, p in a.items() if k not in b]
+    return changed, added, removed
+
+
+def print_diff(old, new):
+    changed, added, removed = diff_report(old, new)
+    lines = changed + added + removed
+    for ln in lines[:40]:
+        print(f"::notice::{ln}")
+    if len(lines) > 40:
+        print(f"::notice::... dan {len(lines) - 40} perubahan lain")
+    print(f"Ringkasan perubahan: {len(changed)} harga berubah, {len(added)} produk baru, {len(removed)} produk dihapus.")
+    summary = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary and lines:
+        with open(summary, "a", encoding="utf-8") as f:
+            f.write("### Perubahan data kalkulator\n\n" + "\n".join(f"- {ln}" for ln in lines[:200]) + "\n")
 
 
 def fingerprint(data):
@@ -555,7 +609,10 @@ def main():
     ap.add_argument("--out", default=OUT_FILE)
     ap.add_argument("--source-name", default=os.environ.get("SOURCE_NAME", "Calculator Promo"))
     ap.add_argument("--force", action="store_true", help="tulis ulang walau data tidak berubah")
+    ap.add_argument("--verbose", action="store_true", help="tampilkan rincian varian berlabel sama")
     args = ap.parse_args()
+    if args.verbose:
+        os.environ["VERBOSE"] = "1"
 
     now = datetime.now(WIB)
     warnings = []
@@ -599,6 +656,8 @@ def main():
         print("Tidak ada perubahan data. data.json tidak diubah.")
         return 0
 
+    if old:
+        print_diff(old, data)
     data["version"] = version
     data["updated_at"] = now.isoformat(timespec="seconds")
     tmp = args.out + ".tmp"

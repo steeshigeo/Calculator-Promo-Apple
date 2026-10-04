@@ -15,7 +15,7 @@ index.html membaca data.json  (dicek ulang tiap 5 menit selama sesi aktif)
 
 | File | Fungsi |
 |---|---|
-| `index.html` | Kalkulator. Membaca `data.json`, menyimpan salinan di perangkat (jalan offline dengan data terakhir). |
+| `index.html` | Kalkulator (desain Liquid Glass, terang/gelap, tampilan ponsel & desktop). Membaca `data.json`, menyimpan salinan di perangkat (jalan offline dengan data terakhir). |
 | `data.json` | Hasil parsing master. **Jangan diedit manual**, akan ditimpa otomatis. |
 | `sync_onedrive.py` | Unduh master → validasi → tulis `data.json`. |
 | `.github/workflows/onedrive_sync.yml` | Jadwal otomatis + tombol manual. |
@@ -35,6 +35,34 @@ index.html membaca data.json  (dicek ulang tiap 5 menit selama sesi aktif)
 5. **Jalankan pertama kali**: tab *Actions → Sync Promo Data → Run workflow*. Pastikan hijau, lalu cek `data.json` ikut ter-commit.
 6. **Deploy**: import repo ke Vercel (atau Netlify / Cloudflare Pages). Setiap commit bot akan men-deploy ulang otomatis.
    Bila memakai GitHub Pages (repo privat butuh paket berbayar), cek setelah run pertama bahwa situs ikut ter-update.
+
+## Tombol Refresh = jalankan GitHub Actions
+
+Tombol **Refresh** di kalkulator menjalankan workflow `onedrive_sync.yml` (repo `steeshigeo/Calculator-Promo-Apple`), menunggu hasilnya,
+lalu memuat data baru otomatis. Alurnya:
+
+1. Token GitHub dibaca dari **sel A2** Google Sheet token (lewat JSONP, tidak disimpan di perangkat, hanya di memori halaman).
+2. Bila sudah ada run yang berjalan, tidak memicu run baru (hemat kuota menit).
+3. Bila belum: `workflow_dispatch` pada branch default, lalu cek status run tiap 4 detik.
+4. Run sukses dan `data.json` berubah: kalkulator menunggu situs ter-deploy lalu memuat data baru. Bila tidak ada perubahan: muncul "Data sudah yang terbaru".
+5. Jeda 45 detik antar-tap supaya tidak memboroskan kuota.
+
+**Token yang aman** (penting, token ini bisa dibaca siapa pun yang memegang link Google Sheet-nya):
+
+- Buat **fine-grained personal access token** (GitHub → Settings → Developer settings), bukan classic token.
+- *Repository access*: hanya repo `Calculator-Promo-Apple`. *Permissions*: **Actions: Read and write** (Metadata: Read otomatis). Jangan beri izin lain.
+- Beri masa berlaku (mis. 90 hari) dan catat tanggalnya. Saat kedaluwarsa, ganti isi A2; kalkulator memuat token ulang otomatis.
+- Dampak terburuk bila token bocor: orang lain bisa memicu workflow berulang (menghabiskan kuota menit) atau menghapus log run. Isi repo dan secret tidak bisa dibaca/diubah dengan izin ini.
+- Opsi lebih aman: pindahkan pemicu ke Vercel Serverless Function (token disimpan di Environment Variable, tidak pernah sampai ke browser).
+
+## Tampilan & perangkat
+
+- Tombol bulan/matahari di header mengganti terang/gelap. Default mengikuti pengaturan perangkat; pilihan manual tersimpan di perangkat itu.
+- Desktop (layar ≥ 1100 px) memakai tata letak penuh dua kolom: kartu langkah di kiri, Rincian Simulasi dan Sales Talk menempel di kanan.
+- **Haptic** saat mengetuk tab iPhone / iPad / Apple Watch / Mac: Android Chrome memakai Vibration API; iPhone/iPad memakai trik `<input switch>` yang butuh Safari iOS 17.4+ dan ketukan langsung dari pengguna.
+  Desktop tidak bergetar. Bila perangkat tidak mendukung, tab tetap berfungsi normal.
+- Promo yang namanya memuat **Samsung** diabaikan (di `sync_onedrive.py`: `IGNORE_PROMO_KEYWORDS`, dan di `index.html` sebagai pengaman untuk data lama).
+- Dropdown Trade In menampilkan nama berhuruf kapital di awal (Samsung, Galaxy A54 5G); `iPhone` dan `iPad` ditulis khusus. Hanya tampilan, nilai asli di data tidak berubah.
 
 ## Cara update harga / promo
 

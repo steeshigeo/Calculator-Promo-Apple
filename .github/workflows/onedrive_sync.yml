@@ -1,51 +1,56 @@
-name: Sync Promo Data
+name: Update Access
 
 on:
-  schedule:
-    # Tiap 30 menit (cukup untuk kuota gratis repo privat). Jadwal GitHub bisa telat beberapa menit.
-    - cron: '*/30 * * * *'
-  workflow_dispatch: # Tombol "Run workflow" di tab Actions untuk update instan setelah mengubah file master
+  workflow_dispatch:
+    inputs:
+      staff_salt:
+        description: 'Salt hex password staff (dari halaman Admin)'
+        required: false
+        default: ''
+      staff_hash:
+        description: 'Hash PBKDF2 password staff'
+        required: false
+        default: ''
+      admin_salt:
+        description: 'Salt hex password admin'
+        required: false
+        default: ''
+      admin_hash:
+        description: 'Hash PBKDF2 password admin'
+        required: false
+        default: ''
 
 permissions:
-  contents: write # supaya bot boleh commit data.json
+  contents: write
 
 concurrency:
-  group: promo-sync
+  group: access-update
   cancel-in-progress: false
 
 jobs:
-  sync-data:
+  update-access:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 3
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Download & Parse Master Data
+      - name: Update access.json
         env:
-          ONEDRIVE_URL: ${{ secrets.ONEDRIVE_DIRECT_URL }}
-        run: |
-          python sync_onedrive.py
+          STAFF_SALT: ${{ inputs.staff_salt }}
+          STAFF_HASH: ${{ inputs.staff_hash }}
+          ADMIN_SALT: ${{ inputs.admin_salt }}
+          ADMIN_HASH: ${{ inputs.admin_hash }}
+        run: python3 update_access.py
 
-      - name: Commit and Push Updated Data
+      - name: Commit and Push
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add data.json
+          git add access.json
           if git diff --staged --quiet; then
-            echo "Tidak ada perubahan data."
+            echo "Tidak ada perubahan."
           else
-            git commit -m "Auto-update promo data"
+            git commit -m "Update access (password)"
             git push || (git pull --rebase && git push)
           fi

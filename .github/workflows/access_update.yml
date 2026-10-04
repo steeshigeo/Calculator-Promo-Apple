@@ -1,0 +1,56 @@
+name: Update Access
+
+on:
+  workflow_dispatch:
+    inputs:
+      staff_salt:
+        description: 'Salt hex password staff (dari halaman Admin)'
+        required: false
+        default: ''
+      staff_hash:
+        description: 'Hash PBKDF2 password staff'
+        required: false
+        default: ''
+      admin_salt:
+        description: 'Salt hex password admin'
+        required: false
+        default: ''
+      admin_hash:
+        description: 'Hash PBKDF2 password admin'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+concurrency:
+  group: access-update
+  cancel-in-progress: false
+
+jobs:
+  update-access:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Update access.json
+        env:
+          STAFF_SALT: ${{ inputs.staff_salt }}
+          STAFF_HASH: ${{ inputs.staff_hash }}
+          ADMIN_SALT: ${{ inputs.admin_salt }}
+          ADMIN_HASH: ${{ inputs.admin_hash }}
+        run: python3 update_access.py
+
+      - name: Commit and Push
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add access.json
+          if git diff --staged --quiet; then
+            echo "Tidak ada perubahan."
+          else
+            git commit -m "Update access (password)"
+            git push || (git pull --rebase && git push)
+          fi

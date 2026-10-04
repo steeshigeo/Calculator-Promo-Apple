@@ -201,54 +201,330 @@ input.control{text-align:right}
 }
 @media(prefers-contrast:more){:root{--rim:rgba(0,0,0,.35);--field-line:rgba(0,0,0,.4);--muted:#2f3a50}:root[data-theme="dark"]{--rim:rgba(255,255,255,.55);--field-line:rgba(255,255,255,.55);--muted:#dfe5f2}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}.refresh.busy svg{animation-duration:3s}}
+
+/* ================= v3: sidebar, halaman, tombol Run/Refresh ================= */
+.topin{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"burger brand actions" "tabs tabs tabs";gap:10px}
+.top.nohome .tabs{display:none}
+.burger{grid-area:burger;position:relative;width:42px;height:42px;padding:0;border-radius:999px;color:var(--ink);background:var(--glass-2);border:1px solid var(--rim);box-shadow:var(--shadow),var(--inset)}
+.burger i{position:absolute;left:12px;width:18px;height:2px;border-radius:2px;background:currentColor;transition:transform .42s cubic-bezier(.65,0,.35,1),top .42s cubic-bezier(.65,0,.35,1),opacity .2s,width .3s}
+.burger i:nth-child(1){top:14px}.burger i:nth-child(2){top:20px;width:12px}.burger i:nth-child(3){top:26px}
+.burger:hover i:nth-child(2){width:18px}
+.burger.open i:nth-child(1){top:20px;transform:rotate(45deg)}
+.burger.open i:nth-child(2){opacity:0;transform:translateX(-8px)}
+.burger.open i:nth-child(3){top:20px;transform:rotate(-45deg)}
+.hxw{position:relative;display:block}
+.hsw{position:absolute;left:0;top:0;width:100%;height:100%;margin:0;opacity:.01;z-index:5;cursor:pointer;touch-action:manipulation}
+[data-haptic="off"] .hsw{display:none}
+.tabs .hxw .tab{width:100%}
+.hactions .hxw{display:block}
+.runbtn,.refresh{position:relative}
+.runbtn{height:42px;border-radius:999px;padding:0 15px;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(180deg,#2f95ff,#007aff);border:1px solid rgba(255,255,255,.35);box-shadow:0 8px 20px rgba(0,122,255,.35),inset 0 1px 0 rgba(255,255,255,.45)}
+.runbtn svg{width:17px;height:17px;flex:none;fill:currentColor}
+.runbtn span{display:none}
+.runbtn.busy{opacity:.55;pointer-events:none;filter:saturate(.6)}
+.cd{display:none;position:absolute;top:-6px;right:-4px;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:var(--accent);color:#fff;font-size:11px;font-weight:800;align-items:center;justify-content:center;border:2px solid var(--bg0);font-variant-numeric:tabular-nums}
+.refresh.counting .cd{display:inline-flex}
+.refresh.ready{color:var(--accent);animation:pulse 1.4s ease-out infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(0,122,255,.55),var(--shadow)}100%{box-shadow:0 0 0 16px rgba(0,122,255,0),var(--shadow)}}
+.theme-hdr{display:none}
+@media(min-width:521px){.runbtn span{display:inline}}
+@media(min-width:640px){.theme-hdr{display:inline-flex}}
+@media(max-width:520px){.brandmark{display:none}.runbtn{width:42px;padding:0}.refresh{width:42px;padding:0}.hactions{gap:6px}.burger,.iconbtn{width:40px;height:40px}.burger i{left:11px}}
+
+/* ---- Sidebar ---- */
+.scrim{position:fixed;inset:0;z-index:120;background:rgba(8,12,26,.38);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);opacity:0;pointer-events:none;transition:opacity .35s}
+.scrim.show{opacity:1;pointer-events:auto}
+html.sb-open,html.sb-open body{overflow:hidden}
+.sidebar{position:fixed;z-index:130;top:0;bottom:0;left:0;width:min(336px,88vw);display:flex;flex-direction:column;padding:calc(18px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom));border-radius:0 34px 34px 0;background:var(--bar);-webkit-backdrop-filter:blur(40px) saturate(180%);backdrop-filter:blur(40px) saturate(180%);border:1px solid var(--rim);border-left:0;box-shadow:24px 0 70px rgba(10,20,50,.28),var(--inset);transform:translateX(-104%);transition:transform .5s cubic-bezier(.32,.72,0,1);visibility:hidden}
+.sidebar.open{transform:none;visibility:visible}
+.sb-head{display:flex;align-items:center;gap:12px;padding:6px 8px 16px}
+.sb-logo{flex:none;width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:var(--glass-2);border:1px solid var(--rim);box-shadow:var(--inset),0 8px 18px rgba(20,30,60,.14);color:var(--ink)}
+.sb-logo svg{width:23px;height:23px;fill:currentColor;margin-top:-1px}
+.sb-title{font-weight:800;font-size:16px;letter-spacing:-.3px;line-height:1.15}
+.sb-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.sb-scroll{flex:1;overflow-y:auto;overflow-x:hidden;margin:0 -6px;padding:0 6px;scrollbar-width:none}
+.sb-scroll::-webkit-scrollbar{display:none}
+.sb-label{font-size:10.5px;font-weight:750;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);padding:14px 10px 7px}
+.sb-item{display:flex;align-items:center;gap:12px;width:100%;height:50px;padding:0 12px 0 8px;border:0;border-radius:18px;background:transparent;color:var(--ink);font-size:14.5px;font-weight:650;text-align:left;transition:background .25s,transform .15s}
+.sb-item .ic{flex:none;width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:var(--field);border:1px solid var(--field-line);color:var(--muted);transition:all .25s}
+.sb-item .ic svg{width:18px;height:18px}
+.sb-item .bd{margin-left:auto;font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--soft);color:var(--accent-ink);border:1px solid var(--soft-line)}
+.sb-item:hover{background:var(--field)}
+.sb-item.active{background:var(--soft);box-shadow:inset 0 0 0 1px var(--soft-line)}
+.sb-item.active .ic{background:var(--accent);border-color:transparent;color:#fff;box-shadow:0 6px 14px rgba(0,122,255,.35)}
+.sidebar.open .sb-item,.sidebar.open .hxw{animation:sbIn .5s cubic-bezier(.32,.72,0,1) both;animation-delay:calc(var(--i,0)*45ms + 120ms)}
+@keyframes sbIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+.sb-set{margin:4px 0 0;border:1px solid var(--field-line);border-radius:22px;background:var(--field);overflow:hidden}
+.sb-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px}
+.sb-row+.sb-row{border-top:1px solid var(--hair)}
+.sb-row b{display:block;font-size:13px;font-weight:700}
+.sb-row small{display:block;font-size:11px;color:var(--muted);margin-top:2px;line-height:1.35;max-width:200px}
+.seg3{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:3px;border-radius:999px;background:var(--seg-bg)}
+.seg3 button{border:0;background:transparent;color:var(--muted);border-radius:999px;padding:7px 9px;font-size:11.5px;font-weight:700}
+.seg3 button.active{background:var(--seg-on);color:var(--ink);box-shadow:var(--seg-shadow)}
+.sb-miniBtn{border:1px solid var(--field-line);background:var(--field);color:var(--ink);border-radius:999px;padding:7px 12px;font-size:11.5px;font-weight:700}
+input.sw{flex:none;margin:0}
+.sw-css input.sw{-webkit-appearance:none;appearance:none;width:46px;height:28px;border-radius:999px;background:var(--seg-bg);position:relative;transition:background .25s;cursor:pointer;border:1px solid var(--field-line)}
+.sw-css input.sw::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.3);transition:transform .25s}
+.sw-css input.sw:checked{background:#34c759;border-color:transparent}
+.sw-css input.sw:checked::after{transform:translateX(18px)}
+.sb-foot{padding-top:10px}
+.credits{border:1px solid transparent;border-radius:22px;transition:background .3s,border-color .3s}
+.credits.open{background:var(--field);border-color:var(--field-line)}
+.credits-toggle{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;border:0;background:transparent;color:var(--muted);font-size:12px;font-weight:650;letter-spacing:.2px;padding:11px 14px}
+.credits-toggle svg{width:13px;height:13px;flex:none}
+.credits-toggle .chev{width:15px;height:15px;transition:transform .35s}
+.credits.open .credits-toggle{justify-content:flex-start;color:var(--ink)}
+.credits.open .credits-toggle .chev{margin-left:auto;transform:rotate(180deg)}
+.credits-panel{display:grid;grid-template-rows:0fr;transition:grid-template-rows .4s cubic-bezier(.32,.72,0,1)}
+.credits.open .credits-panel{grid-template-rows:1fr}
+.credits-inner{overflow:hidden;min-height:0}
+.credits-body{padding:0 16px 14px;max-height:44vh;overflow:auto}
+.who{margin-top:12px}.who b{display:block;font-size:13.5px;font-weight:750}.who span{display:block;font-size:11.5px;color:var(--muted);line-height:1.45;margin-top:2px}
+.credits hr{border:0;border-top:1px solid var(--hair);margin:14px 0 11px}
+.credits .copy{font-size:11px;color:var(--muted);line-height:1.55}
+
+/* ---- Halaman (Guide / About / Admin) ---- */
+.page{width:100%;padding:14px 0 60px;animation:pageIn .45s cubic-bezier(.32,.72,0,1) both}
+@keyframes pageIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+main#app.enter{animation:pageIn .45s cubic-bezier(.32,.72,0,1) both}
+.page>*+*{margin-top:14px}
+.phero{position:relative;overflow:hidden;color:#fff;border-radius:34px;padding:26px 24px;background:linear-gradient(135deg,rgba(0,122,255,.95),rgba(88,86,214,.88) 58%,rgba(50,173,230,.93));border:1px solid rgba(255,255,255,.35);box-shadow:0 20px 50px rgba(0,100,255,.28),inset 0 1px 0 rgba(255,255,255,.5)}
+.phero::after{content:"";position:absolute;width:320px;height:320px;border-radius:50%;right:-100px;top:-140px;background:radial-gradient(circle,rgba(255,255,255,.36),rgba(255,255,255,0) 68%)}
+.phero .k{font-size:11px;font-weight:750;letter-spacing:1.3px;text-transform:uppercase;opacity:.85}
+.phero h1{margin:6px 0 0;font-size:clamp(25px,6vw,38px);letter-spacing:-1px;line-height:1.1}
+.phero p{margin:10px 0 0;max-width:640px;font-size:14px;line-height:1.6;opacity:.95}
+.pgrid{display:grid;gap:14px;grid-template-columns:1fr}
+.p2{display:grid;gap:14px;grid-template-columns:1fr}
+.h2{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:800;letter-spacing:-.3px;margin:6px 4px 0}
+.h2 i{flex:none;width:6px;height:18px;border-radius:4px;background:linear-gradient(180deg,#2f95ff,#7a5cff)}
+.qs{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+.qs .card{padding:16px}
+.qs .n{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:#fff;font-weight:800;font-size:13px;box-shadow:0 6px 14px rgba(0,122,255,.35)}
+.qs b{display:block;font-size:14px;margin-top:10px}
+.qs p{margin:5px 0 0;font-size:12px;line-height:1.55;color:var(--muted)}
+details.dt{border-radius:24px;background:var(--glass);border:1px solid var(--rim);box-shadow:var(--shadow),var(--inset);-webkit-backdrop-filter:blur(28px) saturate(175%);backdrop-filter:blur(28px) saturate(175%);overflow:hidden}
+details.dt+details.dt{margin-top:10px}
+details.dt summary{list-style:none;display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;font-weight:750;font-size:14.5px}
+details.dt summary::-webkit-details-marker{display:none}
+details.dt summary .nn{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--soft);border:1px solid var(--soft-line);color:var(--accent-ink);font-size:13px;font-weight:800}
+details.dt summary::after{content:"";margin-left:auto;flex:none;width:10px;height:10px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .3s;margin-right:4px}
+details.dt[open] summary::after{transform:rotate(-135deg)}
+details.dt .dc{padding:0 16px 16px 56px;font-size:13px;line-height:1.65;color:var(--ink)}
+details.dt .dc p{margin:0 0 8px}
+details.dt .dc ul{margin:6px 0;padding-left:18px;color:var(--muted)}
+details.dt .dc li{margin:3px 0}
+.tip{margin-top:8px;padding:10px 12px;border-radius:14px;background:var(--soft);border:1px solid var(--soft-line);font-size:12px;line-height:1.55;color:var(--muted)}
+.tip b{color:var(--ink)}
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl td{padding:9px 6px;border-top:1px solid var(--hair);vertical-align:top;line-height:1.5}
+.tbl tr:first-child td{border-top:0}
+.tbl td:first-child{font-weight:700;white-space:nowrap;padding-right:14px}
+.tbl td:last-child{color:var(--muted)}
+.btnlist{display:grid;gap:10px}
+.bl{display:flex;gap:12px;align-items:flex-start}
+.bl .bi{flex:none;width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:var(--field);border:1px solid var(--field-line)}
+.bl .bi svg{width:18px;height:18px}
+.bl b{font-size:13.5px}.bl p{margin:2px 0 0;font-size:12.5px;line-height:1.55;color:var(--muted)}
+.stats{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+.stat2{border-radius:24px;padding:16px;background:var(--glass);border:1px solid var(--rim);box-shadow:var(--shadow),var(--inset)}
+.stat2 .v{font-size:26px;font-weight:850;letter-spacing:-.8px}
+.stat2 .l{font-size:12px;color:var(--muted);margin-top:3px}
+.stat2 .v.sm{font-size:15px;letter-spacing:-.2px;line-height:1.3}
+.ul{margin:8px 0 0;padding-left:0;list-style:none;display:grid;gap:10px}
+.ul li{display:flex;gap:10px;font-size:13px;line-height:1.6}
+.ul li::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-top:7px}
+.ul li b{display:block}.ul li span{color:var(--muted)}
+.pcard h3{margin:0 0 6px;font-size:15px;letter-spacing:-.2px}
+.pcard p{margin:0;font-size:13px;line-height:1.65;color:var(--muted)}
+.note{font-size:12px;line-height:1.6;color:var(--muted);text-align:center;padding:6px 14px}
+.adm-lock{display:grid;place-items:center;text-align:center;padding:26px 18px}
+.adm-lock .lk{width:62px;height:62px;border-radius:22px;display:grid;place-items:center;background:var(--soft);border:1px solid var(--soft-line);color:var(--accent-ink);margin-bottom:12px}
+.adm-lock .lk svg{width:28px;height:28px}
+.form{display:grid;gap:12px;margin-top:6px;width:100%;max-width:420px;text-align:left}
+.form .field .control{text-align:left}
+.btn{height:50px;border:0;border-radius:999px;padding:0 20px;font-weight:750;font-size:14px;background:var(--accent);color:#fff;box-shadow:0 8px 22px rgba(0,122,255,.38)}
+.btn.ghost{background:var(--field);color:var(--ink);border:1px solid var(--field-line);box-shadow:none}
+.btn.busy{opacity:.6;pointer-events:none}
+.errtxt{font-size:12px;color:var(--bad);min-height:16px}
+.oktxt{font-size:12.5px;color:var(--muted);line-height:1.55;min-height:18px}
+.kv{display:flex;justify-content:space-between;gap:12px;font-size:12.5px;padding:8px 0;border-top:1px solid var(--hair)}
+.kv:first-of-type{border-top:0}.kv span{color:var(--muted)}
+.actions.off-home{display:none!important}
+
+@media(min-width:720px){.qs{grid-template-columns:repeat(4,1fr)}.p2{grid-template-columns:1fr 1fr}.stats{grid-template-columns:repeat(4,1fr)}.pgrid{grid-template-columns:1fr 1fr}}
+@media(min-width:1100px){
+  .topin{grid-template-columns:auto minmax(240px,1fr) minmax(340px,520px) minmax(240px,1fr);grid-template-areas:"burger brand tabs actions"}
+  .page{max-width:1180px;margin:0 auto}
+  .phero{padding:34px 36px}
+  .sidebar{width:350px}
+}
+@media(prefers-reduced-motion:reduce){.sidebar,.scrim,.burger i,.credits-panel{transition:none!important}.sidebar.open .sb-item,.sidebar.open .hxw,.page,main#app.enter{animation:none!important}}
+.hxw:has(>.busy)>.hsw{display:none}
+.page>.h2{margin-top:26px}
+.page>.h2:first-child{margin-top:0}
 </style>
 </head>
 <body>
 <div class="login-overlay" id="loginOverlay">
   <div class="login-card">
     <div class="login-brand"><div class="login-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg></div><div><div class="login-title">Kalkulator Promo Apple</div><div class="login-sub">Akses staff</div></div></div>
-    <label class="login-label">Password</label>
+    <label class="login-label" for="loginPassword">Password</label>
     <input id="loginPassword" class="login-input" type="password" placeholder="Masukkan password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="login-btn" onclick="doLogin()">MASUK</button>
-    <button class="login-admin" onclick="openAdminLogin()">ADMIN</button>
     <div class="login-error" id="loginError"></div>
+    <div class="admin-note" style="text-align:center">Lupa password? Hubungi admin. Perubahan password berlaku untuk semua staff.</div>
   </div>
 </div>
-<div class="admin-panel" id="adminPanel">
-  <div class="admin-card">
-    <div class="admin-title">Admin Master</div>
-    <div class="admin-sub">Login admin menggunakan user <b>MAPTECH</b>. Dari sini Anda dapat mengganti password staff tanpa mengubah kode HTML.</div>
-    <label class="login-label">Username Admin</label>
-    <input id="adminUser" class="login-input" value="MAPTECH" autocomplete="username">
-    <label class="login-label">Password Admin</label>
-    <input id="adminPass" class="login-input" type="password" placeholder="Password admin" autocomplete="current-password">
-    <button class="login-btn" onclick="doAdminLogin()">LOGIN ADMIN</button>
-    <div id="adminEditor" style="display:none">
-      <label class="login-label">Password Kalkulator Baru</label>
-      <input id="newCalcPass" class="login-input" type="password" placeholder="Masukkan password baru">
-      <label class="login-label">Ulangi Password</label>
-      <input id="newCalcPass2" class="login-input" type="password" placeholder="Ulangi password baru">
-      <div class="admin-actions"><button onclick="closeAdminPanel()">TUTUP</button><button class="primary" onclick="saveCalcPassword()">SIMPAN PASSWORD</button></div>
-      <div class="admin-actions" style="margin-top:10px"><button class="primary" onclick="refreshData(true)">SYNC SEKARANG</button></div>
-      <div class="admin-note">Data harga &amp; promo dibaca dari <b>data.json</b> yang diperbarui otomatis oleh GitHub Actions dari file master. Tombol ini hanya memuat ulang data.json di perangkat ini; untuk memaksa update dari file master, jalankan "Run workflow" di tab Actions GitHub.</div>
+
+<div class="scrim" id="scrim" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar" aria-label="Menu utama" aria-hidden="true" inert>
+  <div class="sb-head"><div class="sb-logo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg></div><div><div class="sb-title">Kalkulator Promo Apple</div><div class="sb-sub">Trainer MAPTECH</div></div></div>
+  <div class="sb-scroll">
+    <div class="sb-label">Menu</div>
+    <button class="sb-item active" style="--i:0" data-hx data-page="home" onclick="go('home')"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></svg></span>Home</button>
+    <button class="sb-item" style="--i:1" data-hx data-page="guide" onclick="go('guide')"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16"/><path d="M9 8h7"/></svg></span>Guide</button>
+    <button class="sb-item" style="--i:2" data-hx data-page="about" onclick="go('about')"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path d="M12 7.7v.1"/></svg></span>About</button>
+    <div class="sb-label">Pengelolaan</div>
+    <button class="sb-item" style="--i:3" data-hx data-page="admin" onclick="go('admin')"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="3"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg></span>Admin<span class="bd" id="adminBadge">Terkunci</span></button>
+    <div class="sb-label">Pengaturan</div>
+    <div class="sb-set">
+      <div class="sb-row"><div><b>Tampilan</b></div><div class="seg3"><button data-theme-mode="auto" onclick="setThemeMode('auto')">Auto</button><button data-theme-mode="light" onclick="setThemeMode('light')">Terang</button><button data-theme-mode="dark" onclick="setThemeMode('dark')">Gelap</button></div></div>
+      <div class="sb-row"><div><b>Getaran</b><small id="hapticStatus">Getar saat mengetuk tab &amp; menu.</small></div><div style="display:flex;align-items:center;gap:8px"><button class="sb-miniBtn hide" id="hapticTestBtn" onclick="testHaptic()">Tes</button><input class="sw" id="hapticSw" type="checkbox" switch checked onchange="setHaptic(this.checked)" aria-label="Getaran"></div></div>
     </div>
-    <div class="login-error" id="adminError"></div>
   </div>
-</div>
+  <div class="sb-foot">
+    <div class="credits" id="credits">
+      <button class="credits-toggle" id="creditsToggle" type="button" aria-expanded="false" aria-controls="creditsPanel" onclick="toggleCredits()"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z"/></svg><span>Contributors</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="credits-panel" id="creditsPanel" role="region" aria-label="Contributors"><div class="credits-inner"><div class="credits-body">
+        <div class="who"><b>Dharma Wangga</b><span>Concept Dev · Initial Design</span></div>
+        <div class="who"><b>Frandy Putra</b><span>Backend Dev · Curation · Engineering</span></div>
+        <div class="who"><b>Trainer Team</b><span>Development</span></div>
+        <hr><div class="copy">© 2026 Trainer MAPTECH<br>All Rights Reserved</div>
+      </div></div></div>
+    </div>
+  </div>
+</aside>
+
 <div class="app">
 <header class="top"><div class="topin">
+ <button class="burger" id="burger" type="button" data-hx data-hxarea="burger" onclick="toggleSidebar()" aria-label="Buka menu" aria-expanded="false" aria-controls="sidebar"><i></i><i></i><i></i></button>
  <div class="brandleft"><div class="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg></div><div class="brandtext"><div class="title">Kalkulator Promo Apple</div><div class="sub" id="updatedText">Memuat data…</div></div></div>
- <div class="hactions"><button class="iconbtn" id="themeBtn" type="button" onclick="toggleTheme()" aria-label="Ganti tampilan terang atau gelap"></button><button class="refresh" id="refreshBtn" type="button" onclick="refreshData(true)" aria-label="Refresh data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4.5V11h-6.5"/></svg><span>Refresh</span></button></div>
+ <div class="hactions">
+  <button class="iconbtn theme-hdr" id="themeBtn" type="button" onclick="toggleTheme()" aria-label="Ganti tampilan terang atau gelap"></button>
+  <button class="runbtn" id="runBtn" type="button" data-hx onclick="runSync()" aria-label="Run: jalankan sinkronisasi dari file master" title="Run — jalankan sinkronisasi dari file master"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.2v13.6a1 1 0 0 0 1.5.86l11-6.8a1 1 0 0 0 0-1.72l-11-6.8A1 1 0 0 0 8 5.2z"/></svg><span>Run</span></button>
+  <button class="refresh" id="refreshBtn" type="button" data-hx onclick="refreshNow()" aria-label="Refresh: muat data terbaru" title="Refresh — muat data terbaru"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4.5V11h-6.5"/></svg><span>Refresh</span><b class="cd" id="refreshCd"></b></button>
+ </div>
  <div class="tabs" id="tabs"></div>
 </div></header>
+
 <main id="app"><div class="loading">Memuat data kalkulator…</div></main>
-<div class="actions hide" id="actions"><button class="action" onclick="copyTalk()">COPY SALES TALK</button><button class="action primary" onclick="shareAll()">BAGIKAN</button><div class="credit">Designed by Dharma Wangga - Backend by Frandy Putra - Developed by Trainer Team</div></div>
+
+<section class="page hide" id="page-guide" aria-label="Guide">
+ <div class="phero"><div class="k">Guide</div><h1>Panduan Penggunaan</h1><p>Dari login sampai sales talk siap kirim. Ikuti urutan 6 langkah, dan hasilnya langsung tersusun di Rincian Simulasi.</p></div>
+ <div class="h2"><i></i>Mulai cepat</div>
+ <div class="qs">
+  <div class="card"><div class="n">1</div><b>Masuk</b><p>Masukkan password staff. Sesi aktif 15 menit lalu otomatis keluar.</p></div>
+  <div class="card"><div class="n">2</div><b>Pilih kategori</b><p>iPhone, iPad, Apple Watch, atau Mac lewat tab di bagian atas.</p></div>
+  <div class="card"><div class="n">3</div><b>Isi langkah 1–6</b><p>Device, Trade In, Qoala, Provider, Metode Pembayaran, lalu Promo.</p></div>
+  <div class="card"><div class="n">4</div><b>Kirim ke customer</b><p>Salin atau bagikan sales talk dengan tombol di bagian bawah layar.</p></div>
+ </div>
+ <div class="h2"><i></i>Langkah demi langkah</div>
+ <div>
+  <details class="dt" open><summary><span class="nn">1</span>Device</summary><div class="dc"><p>Pilih <b>Tipe Device</b>, lalu (khusus iPad) <b>Connectivity</b> Wi-Fi atau Cellular, dan <b>Storage</b> (untuk Mac berupa RAM / Storage). Bila satu pilihan punya beberapa unit, muncul dropdown <b>Varian / Warna</b>.</p><p>Harga Normal dan Harga Promo diambil dari Price List. Selisihnya tampil sebagai "Hemat".</p><div class="tip"><b>Tips:</b> pilih varian sesuai unit yang dibeli customer. Harga warna atau model tertentu (mis. Plus, Nano-glass) bisa berbeda, dan sales talk akan menyebut varian yang Anda pilih.</div></div></details>
+  <details class="dt"><summary><span class="nn">2</span>Trade In</summary><div class="dc"><p>Pilih <b>Merk HP</b>, <b>Tipe HP</b>, lalu <b>Grade &amp; Harga</b>. Nilai trade in otomatis mengurangi harga device. Biarkan kosong bila customer tidak trade in.</p><div class="tip"><b>Tips:</b> pilih grade sesuai hasil pengecekan kondisi unit, bukan perkiraan. Nilai tiap grade berbeda untuk setiap model.</div></div></details>
+  <details class="dt"><summary><span class="nn">3</span>Qoala Protection</summary><div class="dc"><p>Daftar tier otomatis dibatasi sesuai <b>range harga device</b>, sehingga hanya tier yang cocok yang tampil. Pilih tier dan tenor proteksi; biayanya ditambahkan ke total.</p></div></details>
+  <details class="dt"><summary><span class="nn">4</span>Provider</summary><div class="dc"><p>Pilih <b>brand</b> provider, lalu <b>Paket</b>. Harga paket ditambahkan ke total bayar. Lewati bila customer tidak mengambil paket provider.</p></div></details>
+  <details class="dt"><summary><span class="nn">5</span>Metode Pembayaran</summary><div class="dc"><p>Pilih salah satu:</p><ul><li><b>Financing</b>: pilih penyedia, <b>Tenor</b>, <b>DP</b>, dan <b>Biaya Admin</b>. Cicilan dihitung dari harga device dikurangi trade in dan DP, dibagi tenor.</li><li><b>Kartu Kredit</b>: pilih bank dan tenor cicilan 0%. Estimasi cicilan device per bulan langsung tampil.</li></ul></div></details>
+  <details class="dt"><summary><span class="nn">6</span>Promo</summary><div class="dc"><p>Aktif setelah memilih <b>Kartu Kredit</b>. Hanya promo bank yang cocok dengan kartu, <b>Purchase Amount</b> (batas minimal dan maksimal), dan yang periodenya belum berakhir yang ditampilkan.</p><ul><li><b>Direct Discount</b>: langsung mengurangi total bayar.</li><li><b>CB by Billing</b>: cashback setelah tagihan; tampil sebagai "Net setelah cashback".</li></ul><div class="tip"><b>Catatan:</b> Financing tidak menampilkan promo kartu bank. Promo Samsung sengaja tidak dihitung di kalkulator ini.</div></div></details>
+  <details class="dt"><summary><span class="nn">7</span>Rincian Simulasi &amp; Sales Talk</summary><div class="dc"><p>Rincian Simulasi (kolom kanan di desktop, kartu biru di ponsel) merangkum seluruh komponen. <b>Saran Sales Talk</b> tersusun otomatis dari pilihan Anda.</p><ul><li><b>COPY SALES TALK</b>: menyalin teks sales talk.</li><li><b>BAGIKAN</b>: membuka menu bagikan berisi ringkasan lengkap (device, harga, trade in, metode, promo, total).</li></ul></div></details>
+ </div>
+ <div class="h2"><i></i>Membaca Rincian Simulasi</div>
+ <div class="card"><table class="tbl">
+  <tr><td>Harga normal</td><td>Harga resmi dari Price List (dicoret bila ada promo).</td></tr>
+  <tr><td>Potongan promo device</td><td>Selisih harga normal dan harga promo device.</td></tr>
+  <tr><td>Qoala / Provider</td><td>Biaya proteksi dan paket provider yang dipilih (ditambahkan).</td></tr>
+  <tr><td>Trade In / DP</td><td>Nilai trade in dan uang muka (mengurangi pokok cicilan).</td></tr>
+  <tr><td>Biaya Admin</td><td>Hanya untuk Financing, ditambahkan ke total bayar.</td></tr>
+  <tr><td>Total Bayar Customer</td><td>Total setelah semua komponen dan Direct Discount.</td></tr>
+  <tr><td>Estimasi beban / bulan</td><td>Perkiraan cicilan per bulan sesuai tenor yang dipilih.</td></tr>
+ </table></div>
+ <div class="h2"><i></i>Tombol &amp; menu</div>
+ <div class="card btnlist">
+  <div class="bl"><div class="bi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div><div><b>Menu (☰)</b><p>Membuka sidebar: Home, Guide, About, Admin, pengaturan tampilan dan getaran, serta Contributors.</p></div></div>
+  <div class="bl"><div class="bi"><svg viewBox="0 0 24 24" fill="currentColor" style="color:var(--accent)"><path d="M8 5.2v13.6a1 1 0 0 0 1.5.86l11-6.8a1 1 0 0 0 0-1.72l-11-6.8A1 1 0 0 0 8 5.2z"/></svg></div><div><b>Run (▶)</b><p>Menjalankan sinkronisasi harga dan promo dari file master. Tunggu sekitar 20 detik (ada hitung mundur), lalu tap Refresh.</p></div></div>
+  <div class="bl"><div class="bi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4.5V11h-6.5"/></svg></div><div><b>Refresh (↻)</b><p>Memuat data terbaru ke kalkulator. Jika belum berubah, tunggu sebentar (situs bisa butuh hingga 1 menit) lalu tap lagi.</p></div></div>
+  <div class="bl"><div class="bi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2"/></svg></div><div><b>Tampilan &amp; Getaran</b><p>Pilih Auto, Terang, atau Gelap di sidebar. Getaran bisa dimatikan kapan saja.</p></div></div>
+ </div>
+ <div class="h2"><i></i>Pertanyaan umum</div>
+ <div>
+  <details class="dt"><summary>Harga atau promo belum berubah setelah file master diedit</summary><div class="dc"><p>Tap <b>Run</b>, tunggu hitung mundur selesai, lalu tap <b>Refresh</b>. Bila masih sama, tunggu ±1 menit dan Refresh lagi. Pastikan file master sudah tersimpan.</p></div></details>
+  <details class="dt"><summary>Promo bank tidak muncul</summary><div class="dc"><ul><li>Pilih metode <b>Kartu Kredit</b> dan bank yang sesuai.</li><li>Cek <b>Purchase Amount</b> berada di antara batas minimal dan maksimal promo.</li><li>Periode promo mungkin sudah berakhir (otomatis disembunyikan).</li></ul></div></details>
+  <details class="dt"><summary>Harga device berbeda dengan yang saya harapkan</summary><div class="dc"><p>Buka dropdown <b>Varian / Warna</b> dan pilih unit yang tepat. Satu tipe bisa punya beberapa baris dengan harga berbeda.</p></div></details>
+  <details class="dt"><summary>Lupa password</summary><div class="dc"><p>Hubungi admin. Admin dapat mengganti password staff di menu <b>Admin</b>, dan perubahan berlaku untuk semua staff.</p></div></details>
+  <details class="dt"><summary>Getaran tidak terasa</summary><div class="dc"><ul><li>iPhone/iPad: aktifkan <b>Settings → Sounds &amp; Haptics → System Haptics</b>. Versi iOS terbaru hanya merespons sentuhan langsung pada tombol, jadi gunakan ketukan jari biasa.</li><li>Android: pastikan getar sentuhan aktif di pengaturan perangkat.</li><li>Laptop/desktop tidak memiliki motor getar.</li></ul></div></details>
+  <details class="dt"><summary>Apakah hasil simulasi final?</summary><div class="dc"><p>Hasil adalah estimasi untuk membantu penjelasan ke customer. Nominal final mengikuti ketentuan resmi dan sistem transaksi.</p></div></details>
+ </div>
+</section>
+
+<section class="page hide" id="page-about" aria-label="About">
+ <div class="phero"><div class="k">About</div><h1>Tentang Kalkulator Promo Apple</h1><p>Alat internal Trainer MAPTECH untuk menyusun simulasi harga, cicilan, dan promo Apple secara cepat, konsisten, dan selalu mengikuti data terbaru.</p></div>
+ <div class="stats" id="aboutStats">
+  <div class="stat2"><div class="v" id="stProducts">–</div><div class="l">Produk di Price List</div></div>
+  <div class="stat2"><div class="v" id="stTrade">–</div><div class="l">Model Trade In</div></div>
+  <div class="stat2"><div class="v" id="stPromo">–</div><div class="l">Promo bank aktif</div></div>
+  <div class="stat2"><div class="v sm" id="stUpdated">–</div><div class="l">Data diperbarui</div></div>
+ </div>
+ <div class="p2">
+  <div class="card pcard"><h3>Untuk apa kalkulator ini?</h3><p>Membantu staff menjelaskan total biaya dan cicilan kepada customer dengan angka yang jelas: harga promo device, nilai trade in, proteksi Qoala, paket provider, DP, hingga promo bank. Semua dihitung dalam satu layar, lalu diringkas menjadi sales talk siap kirim.</p></div>
+  <div class="card pcard"><h3>Apa yang dihitung?</h3><ul class="ul"><li><div><b>Device &amp; varian</b><span>iPhone, iPad, Apple Watch, dan Mac sesuai Price List.</span></div></li><li><div><b>Trade In per grade</b><span>Nilai tukar HP lama berdasarkan merk, tipe, dan grade.</span></div></li><li><div><b>Proteksi, provider &amp; pembayaran</b><span>Qoala, paket provider, financing, atau kartu kredit 0%.</span></div></li><li><div><b>Promo bank</b><span>Direct Discount dan CB by Billing sesuai range pembelian.</span></div></li></ul></div>
+ </div>
+ <div class="h2"><i></i>Manfaat untuk staff</div>
+ <div class="p2">
+  <div class="card pcard"><h3>Cepat</h3><p>Tidak perlu menghitung manual atau membuka banyak file. Pilih komponen, hasil langsung muncul.</p></div>
+  <div class="card pcard"><h3>Konsisten</h3><p>Semua staff memakai rumus dan data yang sama, sehingga penjelasan ke customer seragam di setiap sesi penjualan.</p></div>
+  <div class="card pcard"><h3>Akurat &amp; terbarui</h3><p>Harga dan promo mengikuti file master dan diperbarui otomatis. Promo yang sudah berakhir tidak ditawarkan.</p></div>
+  <div class="card pcard"><h3>Siap dipakai</h3><p>Sales talk disusun otomatis dan bisa disalin atau dibagikan langsung ke customer.</p></div>
+ </div>
+ <div class="h2"><i></i>Sumber data &amp; keamanan</div>
+ <div class="card pcard"><p>Data harga, trade in, Qoala, provider, dan promo berasal dari file master yang dikelola tim, lalu disinkronkan otomatis ke kalkulator. Perhitungan berjalan di perangkat Anda dan kalkulator tidak menyimpan data customer. Akses dilindungi password staff yang dikelola admin.</p></div>
+ <div class="note">Hasil simulasi adalah estimasi. Nominal final mengikuti ketentuan resmi dan sistem transaksi.</div>
+</section>
+
+<section class="page hide" id="page-admin" aria-label="Admin">
+ <div class="phero"><div class="k">Admin</div><h1>Pengelolaan Akses</h1><p>Ganti password staff dan admin. Perubahan tersinkron ke semua perangkat staff.</p></div>
+ <div class="card adm-lock" id="adminLocked">
+  <div class="lk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="3"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg></div>
+  <div class="section-title">Area Admin Terkunci</div><div class="section-sub" style="margin-bottom:10px">Masukkan kredensial admin untuk membuka.</div>
+  <div class="form">
+   <div class="field"><label class="label" for="adminUser">Username</label><input id="adminUser" class="control" value="MAPTECH" autocomplete="username"></div>
+   <div class="field"><label class="label" for="adminPw">Password admin</label><input id="adminPw" class="control" type="password" placeholder="Password admin" autocomplete="current-password" onkeydown="if(event.key==='Enter')unlockAdmin()"></div>
+   <div class="errtxt" id="adminErr"></div>
+   <button class="btn" onclick="unlockAdmin()">Buka Admin</button>
+  </div>
+ </div>
+ <div class="hide" id="adminOpen">
+  <div class="pgrid">
+   <div class="card"><div class="section-head"><div class="step">1</div><div><div class="section-title">Password Akses Staff</div><div class="section-sub">Dipakai staff untuk masuk ke kalkulator</div></div></div>
+    <div class="form"><div class="field"><label class="label" for="newStaffPw">Password baru</label><input id="newStaffPw" class="control" type="password" autocomplete="new-password" placeholder="Minimal 6 karakter"></div><div class="field"><label class="label" for="newStaffPw2">Ulangi password</label><input id="newStaffPw2" class="control" type="password" autocomplete="new-password" placeholder="Ulangi password baru"></div></div></div>
+   <div class="card"><div class="section-head"><div class="step">2</div><div><div class="section-title">Password Admin</div><div class="section-sub">Opsional. Kosongkan bila tidak diganti</div></div></div>
+    <div class="form"><div class="field"><label class="label" for="newAdminPw">Password admin baru</label><input id="newAdminPw" class="control" type="password" autocomplete="new-password" placeholder="Minimal 6 karakter"></div><div class="field"><label class="label" for="newAdminPw2">Ulangi password admin</label><input id="newAdminPw2" class="control" type="password" autocomplete="new-password" placeholder="Ulangi password admin baru"></div></div></div>
+  </div>
+  <div class="card" style="margin-top:14px">
+   <div class="kv"><span>Password staff terakhir diubah</span><b id="accStaffAt">–</b></div>
+   <div class="kv"><span>Password admin terakhir diubah</span><b id="accAdminAt">–</b></div>
+   <div class="oktxt" id="adminStatus" style="margin-top:10px" aria-live="polite"></div>
+   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px"><button class="btn" id="applyBtn" onclick="applyPasswords()">Terapkan ke semua staff</button><button class="btn ghost" onclick="lockAdmin()">Kunci Admin</button></div>
+   <div class="admin-note" style="margin-top:12px">Password tidak disimpan sebagai teks: perangkat ini mengirim hash terenkripsi (PBKDF2) ke GitHub, lalu tersebar ke semua staff dalam ±1–2 menit. Staff yang sedang login akan diminta masuk ulang.</div>
+  </div>
+ </div>
+</section>
+
+<div class="actions hide" id="actions"><button class="action" onclick="copyTalk()">COPY SALES TALK</button><button class="action primary" onclick="shareAll()">BAGIKAN</button></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </div>
+
 <script>
-const DEFAULT_CALC_PASSWORD='maptech';
-const ADMIN_USER='MAPTECH';
-const ADMIN_PASSWORD='digiceria';
 const SESSION_DURATION_MS=15*60*1000;
 const DATA_URL='data.json';
 const DATA_CACHE_KEY='maptech_data_cache_v1';
@@ -258,18 +534,9 @@ let liveSyncTimer=null;
 let liveSyncBusy=false;
 let liveDataVersion='';
 let DATA=null;
-function getCalcPassword(){return localStorage.getItem('maptech_calc_password')||DEFAULT_CALC_PASSWORD}
-function setLoginSession(){sessionStorage.setItem('maptech_logged_in','1');sessionStorage.setItem('maptech_login_at',String(Date.now()));scheduleAutoLogout();startLiveSync()}
-function clearLoginSession(){sessionStorage.removeItem('maptech_logged_in');sessionStorage.removeItem('maptech_login_at');if(autoLogoutTimer){clearTimeout(autoLogoutTimer);autoLogoutTimer=null;}stopLiveSync()}
 function showLoginOverlay(message=''){document.getElementById('loginOverlay').style.display='flex';document.getElementById('loginPassword').value='';document.getElementById('loginError').textContent=message;}
 function logoutCalculator(message='Sesi berakhir. Silakan login kembali.'){clearLoginSession();showLoginOverlay(message)}
 function scheduleAutoLogout(){if(autoLogoutTimer)clearTimeout(autoLogoutTimer);const loginAt=Number(sessionStorage.getItem('maptech_login_at')||0);if(!loginAt)return;const remaining=SESSION_DURATION_MS-(Date.now()-loginAt);if(remaining<=0){logoutCalculator('Sesi 15 menit telah berakhir. Silakan login kembali.');return;}autoLogoutTimer=setTimeout(()=>logoutCalculator('Sesi 15 menit telah berakhir. Silakan login kembali.'),remaining)}
-function doLogin(){const val=document.getElementById('loginPassword').value;const err=document.getElementById('loginError');if(val===getCalcPassword()){setLoginSession();document.getElementById('loginOverlay').style.display='none';err.textContent='';}else{err.textContent='Password salah.'}}
-function openAdminLogin(){document.getElementById('adminPanel').style.display='flex';document.getElementById('adminEditor').style.display='none';document.getElementById('adminError').textContent='';document.getElementById('adminPass').value='';}
-function doAdminLogin(){const u=document.getElementById('adminUser').value.trim();const p=document.getElementById('adminPass').value;const err=document.getElementById('adminError');if(u===ADMIN_USER&&p===ADMIN_PASSWORD){document.getElementById('adminEditor').style.display='block';err.textContent='';}else{err.textContent='Username atau password admin salah.'}}
-function saveCalcPassword(){const p1=document.getElementById('newCalcPass').value;const p2=document.getElementById('newCalcPass2').value;const err=document.getElementById('adminError');if(!p1||p1.length<4){err.textContent='Password minimal 4 karakter.';return}if(p1!==p2){err.textContent='Konfirmasi password tidak sama.';return}localStorage.setItem('maptech_calc_password',p1);setLoginSession();document.getElementById('adminPanel').style.display='none';document.getElementById('loginOverlay').style.display='none';document.getElementById('loginPassword').value='';alert('Password kalkulator berhasil diubah. Sesi login akan otomatis berakhir setelah 15 menit.');}
-function closeAdminPanel(){document.getElementById('adminPanel').style.display='none'}
-function enforceLogin(){const loggedIn=sessionStorage.getItem('maptech_logged_in')==='1';const loginAt=Number(sessionStorage.getItem('maptech_login_at')||0);if(loggedIn&&loginAt){const remaining=SESSION_DURATION_MS-(Date.now()-loginAt);if(remaining>0){document.getElementById('loginOverlay').style.display='none';scheduleAutoLogout();startLiveSync();return;}}clearLoginSession();showLoginOverlay('Silakan masukkan password untuk memulai sesi 15 menit.')}
 function setStatus(text){const el=document.getElementById('updatedText');if(el)el.textContent=text}
 function normalizePromoData(){if(!DATA)return;DATA.card_options=(Array.isArray(DATA.card_options)?DATA.card_options:[]).filter(c=>!IGNORE_PROMO_KEYWORDS.some(k=>String(c.name||'').toLowerCase().includes(k)));DATA.promos=(Array.isArray(DATA.promos)?DATA.promos:[]).map(x=>({...x,key:`${x.promo}|${x.period}|${x.scheme}|${x.min}|${x.max}|${x.discount}`}))}
 function formatUpdated(s){const d=new Date(s);if(!s||isNaN(d))return s||'-';return d.toLocaleString('id-ID',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}
@@ -298,9 +565,7 @@ async function loadLiveData(force=false){
     return false;
   }finally{clearTimeout(timer);liveSyncBusy=false}
 }
-function startLiveSync(){if(liveSyncTimer)clearInterval(liveSyncTimer);loadLiveData(false);liveSyncTimer=setInterval(()=>{if(sessionStorage.getItem('maptech_logged_in')==='1')loadLiveData(false)},LIVE_SYNC_INTERVAL_MS)}
 function stopLiveSync(){if(liveSyncTimer){clearInterval(liveSyncTimer);liveSyncTimer=null}}
-function refreshData(force=true){triggerSync()}
 let state={tab:'iPhone',group:'',connectivity:'',storage:'',variant:'',tradeBrand:'',tradeModel:'',tradeGrade:'',tradein:0,payment:'financing',financing:'',dp:0,admin:0,tenor:3,card:'',qoala:'',provider:'',providerItem:'',promo:''};
 const IDR=n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Math.round(Number(n)||0));
 const esc=s=>String(s??'').replace(/[&<>'\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c]));
@@ -343,7 +608,7 @@ function setStorage(v){state.storage=v;state.variant='';autoQoala();state.promo=
 function setTradeBrand(v){state.tradeBrand=v;state.tradeModel='';state.tradeGrade='';state.tradein=0;ensureTradein();render()}
 function setTradeModel(v){state.tradeModel=v;state.tradeGrade='';ensureTradein();render()}
 function setTradeGrade(v){state.tradeGrade=v;ensureTradein();state.promo='';refreshSummary()}
-function renderTabs(){document.getElementById('tabs').innerHTML=['iPhone','iPad','Apple Watch','Mac'].map(t=>`<button class="tab ${state.tab===t?'active':''}" onclick="setTab('${t}')">${t}</button>`).join('')}
+function renderTabs(){document.getElementById('tabs').innerHTML=['iPhone','iPad','Apple Watch','Mac'].map(t=>`<button class="tab ${state.tab===t?'active':''}" data-hx onclick="setTab('${t}')">${t}</button>`).join('');hxWrap(document.getElementById('tabs'))}
 function render(){ensureSelection();autoQoala();renderTabs();const p=selectedProduct();const q=quote();const groupsNow=groups();const tradeRows=tradeModels();const qopts=eligibleQoala();const promos=selectedPromoOptions();const card=DATA.card_options.find(x=>x.name===state.card);const fin=DATA.bnpl.find(x=>x.name===state.financing);const mac=state.tab==='Mac';const vopts=variantOptions();const vmulti=new Set(vopts.map(x=>x.promo_price)).size>1;let html='';
  html+=`<section class="hero"><div class="hero-kicker">Smart promo calculator</div><div class="hero-title">Simulasi ${esc(state.tab)}</div><div class="hero-sub">Pilih produk, Trade In, proteksi, provider, metode pembayaran, dan promo bank. Nilai promo dihitung dari master Excel.</div><div class="hero-badges"><span class="badge">4 kategori Apple</span><span class="badge">Trade In by Grade</span><span class="badge">Qoala Auto Range</span><span class="badge">Promo Bank by Min/Max</span></div></section>`;
  html+='<div class="col-main">';
@@ -362,33 +627,79 @@ function salesTalk(q){if(!q.p)return 'Pilih device terlebih dahulu untuk membuat
 function refreshSummary(){const el=document.querySelector('.summary');if(!el)return;const q=quote();el.innerHTML=`<div class="section-head"><div class="step">✓</div><div><div class="section-title">Rincian Simulasi</div><div class="section-sub">Ringkasan seluruh promo & komponen customer</div></div></div>`+summaryHtml(q);const t=document.getElementById('salesTalk');if(t)t.textContent=salesTalk(q)}
 async function copyTalk(){const text=salesTalk(quote());try{await navigator.clipboard.writeText(text);alert('Sales talk berhasil dicopy.')}catch(e){prompt('Copy Sales Talk:',text)}}
 async function shareAll(){const q=quote();const text=`KALKULATOR PROMO APPLE\n\nDevice: ${q.p?.description||'-'}\nHarga normal: ${IDR(q.normal)}\nHarga promo: ${IDR(q.device)}\nTrade In: ${state.tradeBrand?fmtBrand(state.tradeBrand)+' / '+fmtName(state.tradeModel)+' / Grade '+state.tradeGrade+' = '+IDR(q.trade):'Tidak dipilih'}\nMetode: ${q.methodLabel||'-'}\nQoala: ${q.q?q.q.description+' — '+IDR(q.qTotal):'Tidak dipilih'}\nProvider: ${q.prov?q.prov.description+' — '+IDR(q.provTotal):'Tidak dipilih'}\nPromo: ${q.promo?q.promo.promo+' — '+q.promo.scheme+' — '+IDR(q.promo.discount):'Tidak dipilih'}\nTotal bayar: ${IDR(q.total)}\n${q.billingCashback?'Net setelah cashback billing: '+IDR(q.netAfterBilling)+'\n':''}Estimasi / bulan: ${IDR(q.monthlyAll)}\n\nSALES TALK\n${salesTalk(q)}`;if(navigator.share){try{await navigator.share({title:'Simulasi Promo Apple',text})}catch(e){}}else{try{await navigator.clipboard.writeText(text);alert('Rincian sudah dicopy.')}catch(e){prompt('Bagikan rincian:',text)}}}
-/* ===== Tampilan: terang / gelap (default mengikuti perangkat) ===== */
+/* ===== Tampilan: Auto / Terang / Gelap ===== */
+const $i=id=>document.getElementById(id);
 const THEME_KEY='maptech_theme';
 const ICON_SUN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg>';
 const ICON_MOON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>';
+let themeMode='auto';
 function systemDark(){return !!(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)}
-function currentTheme(){return document.documentElement.getAttribute('data-theme')||(systemDark()?'dark':'light')}
-function applyTheme(t,save){
-  document.documentElement.setAttribute('data-theme',t);
+function resolveTheme(){return themeMode==='auto'?(systemDark()?'dark':'light'):themeMode}
+function renderTheme(){
+  const t=resolveTheme();document.documentElement.setAttribute('data-theme',t);
   const m=document.querySelector('meta[name=theme-color]');if(m)m.content=t==='dark'?'#07080d':'#eef3fb';
-  const b=document.getElementById('themeBtn');if(b){b.innerHTML=t==='dark'?ICON_MOON:ICON_SUN;b.title=t==='dark'?'Tampilan gelap (ketuk untuk terang)':'Tampilan terang (ketuk untuk gelap)'}
-  if(save){try{localStorage.setItem(THEME_KEY,t)}catch(e){}}
+  const b=$i('themeBtn');if(b){b.innerHTML=t==='dark'?ICON_MOON:ICON_SUN;b.title=t==='dark'?'Tampilan gelap (ketuk untuk terang)':'Tampilan terang (ketuk untuk gelap)'}
+  document.querySelectorAll('[data-theme-mode]').forEach(x=>x.classList.toggle('active',x.dataset.themeMode===themeMode));
 }
-function toggleTheme(){applyTheme(currentTheme()==='dark'?'light':'dark',true)}
+function setThemeMode(m){themeMode=m;try{if(m==='auto')localStorage.removeItem(THEME_KEY);else localStorage.setItem(THEME_KEY,m)}catch(e){}renderTheme()}
+function toggleTheme(){setThemeMode(resolveTheme()==='dark'?'light':'dark')}
 (function(){
-  let saved=null;try{saved=localStorage.getItem(THEME_KEY)}catch(e){}
-  applyTheme(saved==='light'||saved==='dark'?saved:(systemDark()?'dark':'light'),false);
-  if(window.matchMedia){const mq=window.matchMedia('(prefers-color-scheme: dark)');const on=e=>{let s=null;try{s=localStorage.getItem(THEME_KEY)}catch(_){}if(!s)applyTheme(e.matches?'dark':'light',false)};if(mq.addEventListener)mq.addEventListener('change',on);else if(mq.addListener)mq.addListener(on)}
+  let s=null;try{s=localStorage.getItem(THEME_KEY)}catch(e){}
+  themeMode=(s==='light'||s==='dark')?s:'auto';renderTheme();
+  if(window.matchMedia){const mq=window.matchMedia('(prefers-color-scheme: dark)');const on=()=>{if(themeMode==='auto')renderTheme()};if(mq.addEventListener)mq.addEventListener('change',on);else if(mq.addListener)mq.addListener(on)}
 })();
 
-/* ===== Haptic / Taptic ===== */
-let hapticLabel=null;
+/* ===== Getaran (haptic) =====
+   Android: Vibration API. iOS: Apple menambal pemicu via script di iOS 26.5, jadi switch asli
+   <input type="checkbox" switch> dipasang transparan DI ATAS tombol agar jari menyentuhnya langsung. */
+const IS_IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const IS_SAFARI=IS_IOS||/^((?!chrome|android|crios|fxios|edg).)*safari/i.test(navigator.userAgent);
+let hapticOn=true;try{hapticOn=localStorage.getItem('maptech_haptic')!=='0'}catch(e){}
+let hxActive=false,hapticLabel=null;
+function legacyIosHaptic(){
+  try{if(!hapticLabel){hapticLabel=document.createElement('label');hapticLabel.setAttribute('aria-hidden','true');hapticLabel.style.display='none';const i=document.createElement('input');i.type='checkbox';i.setAttribute('switch','');hapticLabel.appendChild(i);document.head.appendChild(hapticLabel)}hapticLabel.click()}catch(e){}
+}
 function haptic(ms){
+  if(!hapticOn||hxActive)return;
   try{if(typeof navigator.vibrate==='function'){navigator.vibrate(ms||12);return}}catch(e){}
-  try{ /* iOS Safari 17.4+: toggle <input switch> di dalam gesture sentuh memicu Taptic Engine */
-    if(!hapticLabel){hapticLabel=document.createElement('label');hapticLabel.setAttribute('aria-hidden','true');hapticLabel.style.display='none';const i=document.createElement('input');i.type='checkbox';i.setAttribute('switch','');hapticLabel.appendChild(i);document.head.appendChild(hapticLabel)}
-    hapticLabel.click();
-  }catch(e){}
+  if(IS_IOS)legacyIosHaptic();
+}
+function hxTap(e){
+  e.stopPropagation();
+  const i=e.currentTarget;i.checked=false;
+  const t=i.previousElementSibling;
+  if(!t||t.disabled||t.classList.contains('busy'))return;
+  hxActive=true;try{t.click()}finally{setTimeout(()=>{hxActive=false},0)}
+}
+function fitSwitches(){
+  requestAnimationFrame(()=>document.querySelectorAll('.hsw').forEach(i=>{
+    i.style.transform='';const w=i.parentNode.getBoundingClientRect(),r=i.getBoundingClientRect();
+    if(r.width>1&&r.height>1&&(Math.abs(r.width-w.width)>2||Math.abs(r.height-w.height)>2)){i.style.transformOrigin='0 0';i.style.transform='scale('+(w.width/r.width)+','+(w.height/r.height)+')'}
+  }));
+}
+function hxWrap(root){
+  if(!IS_IOS)return;
+  (root||document).querySelectorAll('[data-hx]:not([data-hxd])').forEach(t=>{
+    t.setAttribute('data-hxd','1');
+    const w=document.createElement('span');w.className='hxw';if(t.dataset.hxarea)w.style.gridArea=t.dataset.hxarea;
+    t.parentNode.insertBefore(w,t);w.appendChild(t);
+    const i=document.createElement('input');i.type='checkbox';i.setAttribute('switch','');i.className='hsw';i.tabIndex=-1;i.setAttribute('aria-hidden','true');i.addEventListener('click',hxTap);w.appendChild(i);
+  });
+  fitSwitches();
+}
+window.addEventListener('resize',fitSwitches);
+function setHaptic(on){
+  hapticOn=!!on;try{localStorage.setItem('maptech_haptic',on?'1':'0')}catch(e){}
+  document.documentElement.setAttribute('data-haptic',on?'on':'off');const sw=$i('hapticSw');if(sw)sw.checked=!!on;
+}
+function testHaptic(){try{if(navigator.vibrate)navigator.vibrate(40)}catch(e){}}
+function initHapticUI(){
+  document.documentElement.classList.add(IS_SAFARI?'sw-native':'sw-css');
+  setHaptic(hapticOn);
+  const st=$i('hapticStatus'),tb=$i('hapticTestBtn');
+  if(IS_IOS)st.textContent='iPhone/iPad: getar saat mengetuk tab & menu. Pastikan System Haptics aktif.';
+  else if(typeof navigator.vibrate==='function'&&navigator.maxTouchPoints>0){st.textContent='Getar singkat saat mengetuk tab & menu.';tb.classList.remove('hide')}
+  else st.textContent='Perangkat ini tidak punya motor getar.';
 }
 
 /* ===== Nama Trade In: huruf awal kapital (iPhone / iPad khusus) ===== */
@@ -456,63 +767,224 @@ async function ghFetch(path,opt){
 }
 async function fetchDataJson(){try{const r=await fetch(DATA_URL+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)return null;const j=await r.json();return isValidData(j)?j:null}catch(e){return null}}
 function restoreStatus(){if(DATA)setStatus(`Data tersinkron • update ${formatUpdated(DATA.updated_at)}`)}
-async function triggerSync(){
-  if(syncing)return;
-  const wait=SYNC_COOLDOWN_MS-(Date.now()-lastDispatchAt);
-  if(wait>0){toast(`Sinkronisasi baru saja dipicu. Tunggu ${Math.ceil(wait/1000)} detik lagi.`);return}
-  syncing=true;setRefreshBusy(true);
-  const base='/repos/'+GH_OWNER+'/'+GH_REPO;
-  const wf=base+'/actions/workflows/'+GH_WORKFLOW;
+/* ===== Akses: password global lewat access.json (hash PBKDF2) ===== */
+const ADMIN_USER='MAPTECH';
+const ACCESS_URL='access.json';
+const ACCESS_CACHE_KEY='maptech_access_cache_v1';
+const ACCESS_POLL_MS=window.__ACCESS_POLL_MS||8000;
+const GH_WORKFLOW_ACCESS='access_update.yml';
+const DEFAULT_ACCESS={"v":1,"iter":150000,"staff":{"salt":"e83903fec661fcee63766b42eefaff62","hash":"59f9c814732b77ebe8fcce97f0aa5424e813e19daa3fae44ceab39c2fa01babf","v":"2026-10-04T00:00:00Z"},"admin":{"salt":"8fcebdad6173df23167b375e98d22b04","hash":"c71cde2abe504a4f9e1da54d9b90c761755734cf88e82623a015b8c685cecf71","v":"2026-10-04T00:00:00Z"},"updated_at":"2026-10-04T00:00:00Z"};
+let ACCESS=null,accessFromNetwork=false,currentPage='home';
+const _enc=new TextEncoder();
+function hexToBytes(h){const a=new Uint8Array(h.length/2);for(let i=0;i<a.length;i++)a[i]=parseInt(h.substr(i*2,2),16);return a}
+function bytesToHex(b){return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function randomHex(n){return bytesToHex(crypto.getRandomValues(new Uint8Array(n)))}
+async function pbkdf2Hex(pw,saltHex,iter){
+  if(!(window.crypto&&crypto.subtle))throw new Error('Browser ini butuh HTTPS untuk memeriksa password.');
+  const key=await crypto.subtle.importKey('raw',_enc.encode(pw),'PBKDF2',false,['deriveBits']);
+  return bytesToHex(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:hexToBytes(saltHex),iterations:iter},key,256));
+}
+function validAccess(a){return !!(a&&a.iter>=10000&&a.staff&&a.admin&&/^[0-9a-f]{32}$/.test(a.staff.salt)&&/^[0-9a-f]{64}$/.test(a.staff.hash)&&/^[0-9a-f]{32}$/.test(a.admin.salt)&&/^[0-9a-f]{64}$/.test(a.admin.hash))}
+async function loadAccess(){
   try{
-    loadLiveData(true);
-    setStatus('Menghubungi GitHub…');
-    const r=await ghFetch(wf+'/runs?per_page=5');
-    if(r.status===401)throw new Error('Token GitHub ditolak (salah atau kedaluwarsa). Perbarui token di Google Sheet.');
-    if(r.status===403||r.status===404)throw new Error('Token GitHub tidak punya akses ke repo / Actions ('+r.status+').');
-    if(!r.ok)throw new Error('GitHub error '+r.status);
-    let run=((await r.json()).workflow_runs||[]).find(x=>ACTIVE_RUN.includes(x.status))||null;
-    const t0=Date.now();
-    if(!run){
-      const rr=await ghFetch(base);
-      const ref=rr.ok?((await rr.json()).default_branch||'main'):'main';
-      const d=await ghFetch(wf+'/dispatches',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ref})});
-      if(d.status!==204)throw new Error(d.status===403||d.status===404?'Token GitHub tidak punya izin Actions: write.':d.status===422?'Workflow tidak bisa dijalankan (cek nama workflow / branch).':'GitHub error '+d.status);
-      lastDispatchAt=Date.now();
-      toast('Sinkronisasi dimulai…');
-    }else toast('Sinkronisasi sedang berjalan, menunggu hasilnya…');
-    let done=null;
-    for(let i=0;i<30&&!done;i++){
-      await sleep(4000);
-      setStatus('Sinkronisasi berjalan… '+Math.round((Date.now()-t0)/1000)+' dtk');
-      const q=await ghFetch(wf+'/runs?per_page=5');
-      if(!q.ok)continue;
-      const list=(await q.json()).workflow_runs||[];
-      const cur=run?list.find(x=>x.id===run.id):list.find(x=>x.event==='workflow_dispatch'&&new Date(x.created_at).getTime()>=t0-20000);
-      if(cur){if(!run)run=cur;if(cur.status==='completed')done=cur}
-    }
-    if(!done){toast('Sinkronisasi belum selesai. Coba Refresh lagi dalam 1 menit.');return}
-    if(done.conclusion!=='success'){toast('Sinkronisasi gagal di GitHub ('+done.conclusion+'). Cek log di tab Actions.',6500);return}
-    let committed=null;
-    const cm=await ghFetch(base+'/commits?path=data.json&per_page=1');
-    if(cm.ok){const a=await cm.json();const dt=a[0]&&a[0].commit&&a[0].commit.committer&&a[0].commit.committer.date;committed=dt?new Date(dt).getTime()>=new Date(done.created_at).getTime()-5000:false}
-    if(committed===false){toast('Data sudah yang terbaru (tidak ada perubahan di file master).');await loadLiveData(true);return}
-    setStatus('Menunggu situs memuat data baru…');
-    const limit=Date.now()+(committed?180000:90000);
-    while(Date.now()<limit){
-      const inc=await fetchDataJson();
-      if(inc&&String(inc.version||'')!==liveDataVersion){applyData(inc,'Data terbaru');try{localStorage.setItem(DATA_CACHE_KEY,JSON.stringify(inc))}catch(e){}toast('Data berhasil diperbarui.');return}
-      await sleep(8000);
-    }
-    toast(committed?'Sinkronisasi selesai, tetapi situs belum memuat data baru. Coba Refresh lagi sebentar.':'Data sudah yang terbaru.');
+    const r=await fetch(ACCESS_URL+'?t='+Date.now(),{cache:'no-store'});
+    if(r.status===404){if(!ACCESS)ACCESS=DEFAULT_ACCESS;return ACCESS}
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const j=await r.json();if(!validAccess(j))throw new Error('format access.json tidak valid');
+    ACCESS=j;accessFromNetwork=true;try{localStorage.setItem(ACCESS_CACHE_KEY,JSON.stringify(j))}catch(e){}
   }catch(e){
-    const m=String(e&&e.message||e);
-    toast(/^(Token|GitHub|Workflow)/.test(m)?m:'Sinkronisasi gagal: '+m,6500);
-  }finally{syncing=false;setRefreshBusy(false);restoreStatus()}
+    if(!ACCESS){try{const c=JSON.parse(localStorage.getItem(ACCESS_CACHE_KEY)||'null');if(validAccess(c))ACCESS=c}catch(_){}}
+    if(!ACCESS)ACCESS=DEFAULT_ACCESS;
+  }
+  return ACCESS;
+}
+async function verifyPw(pw,rec){return (await pbkdf2Hex(pw,rec.salt,ACCESS.iter))===rec.hash}
+function ses(k,v){if(v===undefined)return sessionStorage.getItem(k);if(v===null)sessionStorage.removeItem(k);else sessionStorage.setItem(k,v)}
+function secretVer(role){const r=role==='admin'?ACCESS.admin:ACCESS.staff;return r.v||''}
+function sessionValid(){return ses('maptech_logged_in')==='1'&&!!ACCESS&&(ses('maptech_ver')||'')===secretVer(ses('maptech_role')||'staff')}
+function isAdmin(){return !!ACCESS&&ses('maptech_adminver')!==null&&ses('maptech_adminver')===(ACCESS.admin.v||'')}
+function setLoginSession(role,ver){ses('maptech_logged_in','1');ses('maptech_login_at',String(Date.now()));ses('maptech_role',role);ses('maptech_ver',ver||'');if(role==='admin')ses('maptech_adminver',ver||'');scheduleAutoLogout();startLiveSync();applyRoleUI()}
+function clearLoginSession(){['maptech_logged_in','maptech_login_at','maptech_role','maptech_ver','maptech_adminver'].forEach(k=>ses(k,null));if(autoLogoutTimer){clearTimeout(autoLogoutTimer);autoLogoutTimer=null}stopLiveSync();applyRoleUI()}
+function applyRoleUI(){const b=$i('adminBadge');if(b)b.textContent=isAdmin()?'Terbuka':'Terkunci';if(currentPage==='admin')renderAdmin()}
+function checkSessionAgainstAccess(){
+  if(ses('maptech_logged_in')!=='1'||!ACCESS)return;
+  if(!sessionValid()){logoutCalculator('Password telah diubah oleh admin. Silakan login kembali.');return}
+  if(ses('maptech_adminver')!==null&&!isAdmin()){ses('maptech_adminver',null);applyRoleUI()}
+}
+async function doLogin(){
+  const val=$i('loginPassword').value,err=$i('loginError');
+  if(!val){err.textContent='Masukkan password.';return}
+  err.textContent='Memeriksa…';
+  try{
+    if(!ACCESS)await loadAccess();
+    let role=null;
+    if(await verifyPw(val,ACCESS.staff))role='staff';else if(await verifyPw(val,ACCESS.admin))role='admin';
+    if(!role){await sleep(450);err.textContent='Password salah.';return}
+    setLoginSession(role,secretVer(role));$i('loginOverlay').style.display='none';err.textContent='';$i('loginPassword').value='';showPage('home');
+  }catch(e){err.textContent=e.message||'Gagal memeriksa password.'}
+}
+function enforceLogin(){
+  const at=Number(ses('maptech_login_at')||0);
+  if(at&&sessionValid()&&SESSION_DURATION_MS-(Date.now()-at)>0){$i('loginOverlay').style.display='none';scheduleAutoLogout();startLiveSync();applyRoleUI();return}
+  clearLoginSession();showLoginOverlay('Silakan masukkan password untuk memulai sesi 15 menit.');
+}
+function startLiveSync(){
+  if(liveSyncTimer)clearInterval(liveSyncTimer);loadLiveData(false);
+  liveSyncTimer=setInterval(()=>{if(ses('maptech_logged_in')==='1'){loadLiveData(false);loadAccess().then(checkSessionAgainstAccess)}},LIVE_SYNC_INTERVAL_MS);
 }
 
-setStatus('Memuat data…');
-enforceLogin();
-loadLiveData(false);
+/* ---- Halaman Admin ---- */
+function renderAdmin(){
+  const locked=!isAdmin();
+  $i('adminLocked').classList.toggle('hide',!locked);$i('adminOpen').classList.toggle('hide',locked);
+  if(!locked&&ACCESS){$i('accStaffAt').textContent=formatUpdated(ACCESS.staff.v);$i('accAdminAt').textContent=formatUpdated(ACCESS.admin.v)}
+}
+async function unlockAdmin(){
+  const u=$i('adminUser').value.trim(),p=$i('adminPw').value,err=$i('adminErr');
+  if(u!==ADMIN_USER||!p){err.textContent='Username atau password admin salah.';return}
+  err.textContent='Memeriksa…';
+  try{
+    if(!ACCESS)await loadAccess();
+    if(await verifyPw(p,ACCESS.admin)){ses('maptech_adminver',ACCESS.admin.v||'');$i('adminPw').value='';err.textContent='';applyRoleUI();toast('Admin terbuka.')}
+    else{await sleep(450);err.textContent='Username atau password admin salah.'}
+  }catch(e){err.textContent=e.message||'Gagal memeriksa password.'}
+}
+function lockAdmin(){
+  if(ses('maptech_role')==='admin'){logoutCalculator('Admin dikunci. Silakan login kembali.');return}
+  ses('maptech_adminver',null);applyRoleUI();toast('Admin dikunci.');
+}
+function ghStatusError(s){return s===401?'Token GitHub ditolak (salah atau kedaluwarsa). Perbarui token di Google Sheet.':(s===403||s===404)?'Token GitHub tidak punya izin Actions: write (atau workflow belum ada di repo).':s===422?'Workflow tidak bisa dijalankan (cek nama workflow / input / branch).':'GitHub error '+s}
+async function dispatchWorkflow(file,inputs){
+  const base='/repos/'+GH_OWNER+'/'+GH_REPO;
+  const rr=await ghFetch(base);const ref=rr.ok?((await rr.json()).default_branch||'main'):'main';
+  const body={ref};if(inputs)body.inputs=inputs;
+  const d=await ghFetch(base+'/actions/workflows/'+file+'/dispatches',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(d.status!==204)throw new Error(ghStatusError(d.status));
+}
+let accessBusy=false;
+async function applyPasswords(){
+  if(accessBusy)return;
+  const set=t=>{$i('adminStatus').textContent=t};
+  if(!isAdmin()){set('Buka kunci admin terlebih dahulu.');return}
+  const sp=$i('newStaffPw').value,sp2=$i('newStaffPw2').value,ap=$i('newAdminPw').value,ap2=$i('newAdminPw2').value;
+  if(!sp&&!ap){set('Isi password staff baru dan/atau password admin baru.');return}
+  if((sp&&sp.length<6)||(ap&&ap.length<6)){set('Password minimal 6 karakter.');return}
+  if(sp!==sp2||ap!==ap2){set('Konfirmasi password tidak sama.');return}
+  accessBusy=true;$i('applyBtn').classList.add('busy');
+  try{
+    set('Menyiapkan hash password…');
+    const iter=ACCESS.iter,inputs={},before={s:ACCESS.staff.v,a:ACCESS.admin.v};
+    if(sp){const salt=randomHex(16);inputs.staff_salt=salt;inputs.staff_hash=await pbkdf2Hex(sp,salt,iter)}
+    if(ap){const salt=randomHex(16);inputs.admin_salt=salt;inputs.admin_hash=await pbkdf2Hex(ap,salt,iter)}
+    set('Mengirim perubahan ke GitHub…');
+    await dispatchWorkflow(GH_WORKFLOW_ACCESS,inputs);
+    set('Terkirim. Menunggu GitHub & situs memperbarui (±1–2 menit)…');
+    const end=Date.now()+240000;let ok=false;
+    while(Date.now()<end){
+      await sleep(ACCESS_POLL_MS);await loadAccess();
+      if((sp&&ACCESS.staff.v!==before.s)||(ap&&ACCESS.admin.v!==before.a)){ok=true;break}
+    }
+    if(!ok){set('Belum terdeteksi. Cek tab Actions di GitHub (workflow "Update Access"), lalu muat ulang halaman.');return}
+    if(ses('maptech_role')==='admin'){if(ap){ses('maptech_ver',ACCESS.admin.v||'')}}else if(sp){ses('maptech_ver',ACCESS.staff.v||'')}
+    if(ap&&ses('maptech_adminver')!==null)ses('maptech_adminver',ACCESS.admin.v||'');
+    ['newStaffPw','newStaffPw2','newAdminPw','newAdminPw2'].forEach(id=>$i(id).value='');
+    set('Berhasil. Password baru berlaku untuk semua staff; staff lain akan diminta login ulang.');toast('Password berhasil diperbarui untuk semua staff.',5000);renderAdmin();
+  }catch(e){set(String(e&&e.message||e))}
+  finally{accessBusy=false;$i('applyBtn').classList.remove('busy')}
+}
+
+/* ===== Sidebar & halaman ===== */
+function setSidebar(open){
+  const sb=$i('sidebar');sb.classList.toggle('open',open);$i('scrim').classList.toggle('show',open);
+  const b=$i('burger');b.classList.toggle('open',open);b.setAttribute('aria-expanded',String(open));b.setAttribute('aria-label',open?'Tutup menu':'Buka menu');
+  document.documentElement.classList.toggle('sb-open',open);
+  if(open){sb.removeAttribute('inert');sb.setAttribute('aria-hidden','false')}else{sb.setAttribute('inert','');sb.setAttribute('aria-hidden','true')}
+}
+function toggleSidebar(){haptic();setSidebar(!$i('sidebar').classList.contains('open'))}
+function closeSidebar(){setSidebar(false)}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSidebar()});
+function toggleCredits(force){
+  const c=$i('credits'),open=typeof force==='boolean'?force:!c.classList.contains('open');
+  c.classList.toggle('open',open);$i('creditsToggle').setAttribute('aria-expanded',String(open));
+}
+function go(p){haptic();showPage(p);closeSidebar()}
+function showPage(p){
+  currentPage=p;
+  $i('app').classList.toggle('hide',p!=='home');
+  ['guide','about','admin'].forEach(n=>$i('page-'+n).classList.toggle('hide',p!==n));
+  document.querySelector('.top').classList.toggle('nohome',p!=='home');
+  $i('actions').classList.toggle('off-home',p!=='home');
+  document.querySelectorAll('.sb-item[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===p));
+  const t=p==='home'?$i('app'):$i('page-'+p);t.classList.remove('enter');void t.offsetWidth;t.classList.add('enter');
+  if(p==='about')renderAbout();if(p==='admin')renderAdmin();
+  window.scrollTo(0,0);
+}
+function renderAbout(){
+  if(!DATA)return;
+  const set=(id,v)=>{const e=$i(id);if(e)e.textContent=v};
+  set('stProducts',Object.values(DATA.catalog||{}).reduce((a,x)=>a+x.length,0).toLocaleString('id-ID'));
+  set('stTrade',(DATA.trade_in||[]).length.toLocaleString('id-ID'));
+  set('stPromo',(DATA.promos||[]).filter(promoActive).length.toLocaleString('id-ID'));
+  set('stUpdated',formatUpdated(DATA.updated_at));
+}
+
+/* ===== Run (▶) & Refresh (↻) ===== */
+const RUN_CD_SEC=window.__RUN_CD||20;
+const RUN_MSG='Sync in progress, wait ~20s then tap Refresh.';
+let cdTimer=null,cdEnd=0,lastRunAt=0;
+function stopCountdown(){
+  if(cdTimer){clearInterval(cdTimer);cdTimer=null}
+  const b=$i('refreshBtn');if(b)b.classList.remove('counting');const r=$i('runBtn');if(r)r.classList.remove('busy');
+}
+function startCountdown(sec){
+  stopCountdown();cdEnd=Date.now()+sec*1000;
+  const b=$i('refreshBtn'),cd=$i('refreshCd'),r=$i('runBtn');b.classList.remove('ready');b.classList.add('counting');r.classList.add('busy');
+  const tick=()=>{
+    const left=Math.max(0,Math.ceil((cdEnd-Date.now())/1000));cd.textContent=left;
+    if(left>0){setStatus('Sync berjalan • tap Refresh dalam '+left+' dtk')}
+    else{clearInterval(cdTimer);cdTimer=null;b.classList.remove('counting');b.classList.add('ready');r.classList.remove('busy');setStatus('Sync selesai? Tap Refresh untuk memuat data terbaru.')}
+  };
+  tick();cdTimer=setInterval(tick,250);
+}
+async function runSync(){
+  if(syncing)return;
+  const wait=SYNC_COOLDOWN_MS-(Date.now()-lastDispatchAt);
+  if(wait>0){toast('Sync baru saja dijalankan. Tunggu '+Math.ceil(wait/1000)+' detik lalu tap Refresh.');return}
+  syncing=true;haptic();
+  toast(RUN_MSG,6500);startCountdown(RUN_CD_SEC);
+  try{
+    const wf='/repos/'+GH_OWNER+'/'+GH_REPO+'/actions/workflows/'+GH_WORKFLOW;
+    const r=await ghFetch(wf+'/runs?per_page=5');
+    if(!r.ok)throw new Error(ghStatusError(r.status));
+    const active=((await r.json()).workflow_runs||[]).some(x=>ACTIVE_RUN.includes(x.status));
+    if(!active){await dispatchWorkflow(GH_WORKFLOW);lastDispatchAt=Date.now()}
+    lastRunAt=Date.now();
+  }catch(e){
+    stopCountdown();const m=String(e&&e.message||e);
+    toast(/^(Token|GitHub|Workflow)/.test(m)?m:'Sinkronisasi gagal: '+m,6500);restoreStatus();
+  }finally{syncing=false}
+}
+async function refreshNow(){
+  const b=$i('refreshBtn');if(b.classList.contains('busy'))return;
+  haptic();stopCountdown();b.classList.remove('ready');b.classList.add('busy');
+  const before=liveDataVersion;
+  try{
+    const ok=await loadLiveData(true);loadAccess().then(checkSessionAgainstAccess);
+    if(!ok)toast('Gagal memuat data. Periksa koneksi internet.',5000);
+    else if(liveDataVersion!==before)toast('Data berhasil diperbarui.');
+    else if(Date.now()-lastRunAt<180000)toast('Belum ada data baru. Situs bisa butuh hingga 1 menit — tap Refresh lagi sebentar.',6000);
+    else toast('Data sudah yang terbaru.');
+  }finally{b.classList.remove('busy');restoreStatus()}
+}
+function refreshData(){refreshNow()}
+
+async function initApp(){
+  setStatus('Memuat data…');initHapticUI();hxWrap(document);showPage('home');
+  await loadAccess();enforceLogin();loadLiveData(false);
+}
+
+initApp();
+
 </script>
 </body>
 </html>

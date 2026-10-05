@@ -48,10 +48,19 @@ index.html membaca data.json  (dicek ulang tiap 5 menit selama sesi aktif)
   "Tidak ada perubahan data", artinya `data.json` sudah sama dengan file master saat itu.
 - **Jangan menimpa `data.json` dan `access.json`** di repo saat meng-update file lain; keduanya dibuat/diubah otomatis oleh Action.
 
+## Pembayaran, promo & sesi
+
+- **Metode pembayaran**: Financing, Kartu Kredit, dan **Kartu Debit** (bayar penuh langsung, tanpa cicilan).
+- **Promo** (langkah 6) hanya menampilkan promo yang: banknya cocok dengan kartu yang dipilih, **Purchase Amount** (harga device promo) ada di antara *Minimal* dan *Maximal Amount*, dan periodenya belum berakhir.
+  Promo kartu debit (nama bank memuat "debit", mis. "BCA Debit") hanya untuk Kartu Debit, dan sebaliknya. Format tiap baris: `promo • bank • scheme • nominal • periode`.
+  Semua data promo dibaca ulang dari tab *Promo Berjalan* setiap sync (scheme dibaca fleksibel: "Direct Discount" / "CB by Billing", variasi seperti "Cashback Billing" otomatis dikenali).
+- **Direct Discount** langsung memotong harga device (terlihat di Rincian Simulasi, cicilan ikut turun). **CB by Billing** hanya dirinci, **tidak memotong**; cashback diberikan bank minimal 3 bulan setelah periode promo berakhir.
+- **Sesi staff** berakhir otomatis bila tidak ada aktivitas selama 15 menit (klik, ketik, scroll, sentuh memperpanjang sesi).
+
 ## Menu, halaman, Run & Refresh
 
-- **Sidebar (☰)**: Home (kalkulator, halaman awal), Guide (panduan pemakaian), About (deskripsi & manfaat untuk staff, dengan statistik data), Admin, pengaturan Tampilan (Auto/Terang/Gelap) dan Getaran, serta **Contributors**.
-- **Run (▶)**: memicu workflow `onedrive_sync.yml` (repo `steeshigeo/Calculator-Promo-Apple`) dan menampilkan popup
+- **Sidebar (☰)**: Home (kalkulator, halaman awal), Guide (panduan pemakaian), About (deskripsi & manfaat untuk staff, dengan statistik data), Admin, pengaturan Tampilan (Auto/Terang/Gelap) dan Getaran, serta **Credits** (selalu terbuka).
+- **Run (▶)**: khusus **admin**. Tap Run → popup minta password admin → baru memicu workflow `onedrive_sync.yml` (repo `steeshigeo/Calculator-Promo-Apple`) dan menampilkan popup
   *"Sync in progress, wait ~20s then tap Refresh."* dengan hitung mundur di home (di teks status dan lencana tombol Refresh).
   Bila sudah ada run yang berjalan, Run tidak memicu ganda. Jeda 45 detik antar-Run.
 - **Refresh (↻)**: memuat `data.json` terbaru ke kalkulator (berdenyut saat hitung mundur selesai). Bila belum berubah, tunggu ±1 menit
@@ -123,7 +132,7 @@ Log run akan menyebut host dan kode HTTP tiap percobaan (tanpa membuka isi link-
 - **Promo Berjalan**: kolom `Scheme` hanya `Direct Discount` atau `CB by Billing`. Kolom `Periode` kosong = ikut baris di atasnya.
   Tanggal berakhir dibaca dari teks Periode (mis. `24 April - 13 September`, `Hingga 31 Desember`); promo yang sudah lewat otomatis
   disembunyikan di kalkulator. Periode yang tidak terbaca tetap ditampilkan.
-- **Kartu kredit**: tenor cicilan 0% ada di `CARD_MATRIX` pada `sync_onedrive.py` (bukan di sheet). Bank yang muncul di sheet Promo
+- **Tab BANK**: kolom A = nama bank, kolom C–G = tenor. Dipakai untuk daftar **Kartu Kredit** (bank + tenor) dan **Kartu Debit** (semua bank di kolom A). Cara membaca kolom C–G: bila header berupa angka (3, 6, 12, 18, 24 atau "3 Bulan"), sel yang berisi tanda apa pun (✓, Y, 1, 0%) berarti tenor itu tersedia, sel kosong / "-" / 0 = tidak tersedia; bila header bukan angka, angka di dalam sel dianggap tenornya. Bank tanpa tenor hanya muncul untuk Kartu Debit. Log Action mencetak hasil bacaan tiap bank (`BANK BCA: tenor 3, 6, 12 …`) agar mudah diverifikasi. Bila tab BANK tidak ada, dipakai daftar bawaan (`CARD_MATRIX`).
   tapi belum ada di `CARD_MATRIX` ditambahkan otomatis dengan tenor 3/6/12 dan diberi peringatan di log.
 
 ## Uji di komputer sendiri

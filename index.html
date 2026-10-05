@@ -363,6 +363,41 @@ details.dt .dc li{margin:3px 0}
 .hxw:has(>.busy)>.hsw{display:none}
 .page>.h2{margin-top:26px}
 .page>.h2:first-child{margin-top:0}
+
+/* ===== v4 ===== */
+.payrow.p3{grid-template-columns:repeat(3,1fr)}
+.payrow.p3 .paybtn{padding:12px 4px;font-size:12.5px}
+.plist{display:grid;gap:8px;margin-top:10px}
+.pitem{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;border:1px solid var(--field-line);background:var(--field);color:var(--ink);border-radius:18px;padding:12px 14px;transition:background .2s,border-color .2s,box-shadow .2s}
+.pitem.sel{background:var(--soft);border-color:var(--accent);box-shadow:0 0 0 3px var(--soft)}
+.pitem .rad{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--field-line);margin-top:1px;position:relative;transition:border-color .2s}
+.pitem.sel .rad{border-color:var(--accent)}
+.pitem.sel .rad::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--accent)}
+.pitem .ptxt{display:block;min-width:0}
+.pitem .pl{display:block;font-size:13px;line-height:1.55}
+.pitem .pl b{font-weight:750}
+.pitem .amt{font-weight:800;color:var(--accent-ink)}
+.pitem .per{color:var(--muted)}
+.pitem .sch{font-weight:700;padding:1px 8px;border-radius:999px;font-size:11.5px;white-space:nowrap}
+.pitem .sch.direct{background:rgba(52,199,89,.16);color:var(--good)}
+.pitem .sch.cb{background:rgba(255,159,10,.18);color:#c77700}
+:root[data-theme="dark"] .pitem .sch.cb{color:#ffb340}
+.pitem .sch.other{background:var(--seg-bg);color:var(--muted)}
+.pitem .pn{display:block;margin-top:5px;font-size:11.5px;line-height:1.5;color:var(--muted)}
+.pitem.none .pl{font-size:13px}
+#promoDetail .mini-note{margin-top:10px}
+.credits.static{background:var(--field);border:1px solid var(--field-line);border-radius:22px}
+.credits-head{display:flex;align-items:center;gap:7px;padding:13px 16px 0;font-size:12.5px;font-weight:750;letter-spacing:.2px;color:var(--ink)}
+.credits-head svg{width:13px;height:13px}
+.credits.static .credits-body{padding:0 16px 14px;max-height:none;overflow:visible}
+.modal{position:fixed;inset:0;z-index:250;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(8,12,26,.46);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.modal.show{display:flex;animation:pageIn .3s cubic-bezier(.32,.72,0,1) both}
+.modal-card{width:min(400px,100%);border-radius:32px;padding:24px;background:var(--glass-2);border:1px solid var(--rim);box-shadow:var(--shadow),var(--inset);-webkit-backdrop-filter:blur(30px) saturate(175%);backdrop-filter:blur(30px) saturate(175%)}
+.modal-card .lk{width:54px;height:54px;border-radius:19px;display:grid;place-items:center;background:var(--soft);border:1px solid var(--soft-line);color:var(--accent-ink);margin-bottom:12px}
+.modal-card .lk svg{width:24px;height:24px}
+.modal-card h3{margin:0;font-size:19px;letter-spacing:-.4px}
+.modal-card p{margin:5px 0 14px;font-size:12.5px;line-height:1.55;color:var(--muted)}
+.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 </style>
 </head>
 <body>
@@ -394,14 +429,14 @@ details.dt .dc li{margin:3px 0}
     </div>
   </div>
   <div class="sb-foot">
-    <div class="credits" id="credits">
-      <button class="credits-toggle" id="creditsToggle" type="button" aria-expanded="false" aria-controls="creditsPanel" onclick="toggleCredits()"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z"/></svg><span>Contributors</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
-      <div class="credits-panel" id="creditsPanel" role="region" aria-label="Contributors"><div class="credits-inner"><div class="credits-body">
+    <div class="credits static" id="credits" role="region" aria-label="Credits">
+      <div class="credits-head"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z"/></svg><span>Credits</span></div>
+      <div class="credits-body">
         <div class="who"><b>Dharma Wangga</b><span>Concept Dev · Initial Design</span></div>
-        <div class="who"><b>Frandy Putra</b><span>Backend Dev · Curation · Engineering</span></div>
+        <div class="who"><b>Frandy Putra</b><span>Backend Dev · UI/UX Dev · Engineering</span></div>
         <div class="who"><b>Trainer Team</b><span>Development</span></div>
         <hr><div class="copy">© 2026 Trainer MAPTECH<br>All Rights Reserved</div>
-      </div></div></div>
+      </div>
     </div>
   </div>
 </aside>
@@ -412,7 +447,7 @@ details.dt .dc li{margin:3px 0}
  <div class="brandleft"><div class="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg></div><div class="brandtext"><div class="title">Kalkulator Promo Apple</div><div class="sub" id="updatedText">Memuat data…</div></div></div>
  <div class="hactions">
   <button class="iconbtn theme-hdr" id="themeBtn" type="button" onclick="toggleTheme()" aria-label="Ganti tampilan terang atau gelap"></button>
-  <button class="runbtn" id="runBtn" type="button" data-hx onclick="runSync()" aria-label="Run: jalankan sinkronisasi dari file master" title="Run — jalankan sinkronisasi dari file master"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.2v13.6a1 1 0 0 0 1.5.86l11-6.8a1 1 0 0 0 0-1.72l-11-6.8A1 1 0 0 0 8 5.2z"/></svg><span>Run</span></button>
+  <button class="runbtn" id="runBtn" type="button" data-hx onclick="openRunModal()" aria-label="Run: jalankan sinkronisasi (khusus admin)" title="Run — khusus admin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.2v13.6a1 1 0 0 0 1.5.86l11-6.8a1 1 0 0 0 0-1.72l-11-6.8A1 1 0 0 0 8 5.2z"/></svg><span>Run</span></button>
   <button class="refresh" id="refreshBtn" type="button" data-hx onclick="refreshNow()" aria-label="Refresh: muat data terbaru" title="Refresh — muat data terbaru"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4.5V11h-6.5"/></svg><span>Refresh</span><b class="cd" id="refreshCd"></b></button>
  </div>
  <div class="tabs" id="tabs"></div>
@@ -424,7 +459,7 @@ details.dt .dc li{margin:3px 0}
  <div class="phero"><div class="k">Guide</div><h1>Panduan Penggunaan</h1><p>Dari login sampai sales talk siap kirim. Ikuti urutan 6 langkah, dan hasilnya langsung tersusun di Rincian Simulasi.</p></div>
  <div class="h2"><i></i>Mulai cepat</div>
  <div class="qs">
-  <div class="card"><div class="n">1</div><b>Masuk</b><p>Masukkan password staff. Sesi aktif 15 menit lalu otomatis keluar.</p></div>
+  <div class="card"><div class="n">1</div><b>Masuk</b><p>Masukkan password staff. Sesi otomatis berakhir bila tidak ada aktivitas selama 15 menit.</p></div>
   <div class="card"><div class="n">2</div><b>Pilih kategori</b><p>iPhone, iPad, Apple Watch, atau Mac lewat tab di bagian atas.</p></div>
   <div class="card"><div class="n">3</div><b>Isi langkah 1–6</b><p>Device, Trade In, Qoala, Provider, Metode Pembayaran, lalu Promo.</p></div>
   <div class="card"><div class="n">4</div><b>Kirim ke customer</b><p>Salin atau bagikan sales talk dengan tombol di bagian bawah layar.</p></div>
@@ -435,14 +470,16 @@ details.dt .dc li{margin:3px 0}
   <details class="dt"><summary><span class="nn">2</span>Trade In</summary><div class="dc"><p>Pilih <b>Merk HP</b>, <b>Tipe HP</b>, lalu <b>Grade &amp; Harga</b>. Nilai trade in otomatis mengurangi harga device. Biarkan kosong bila customer tidak trade in.</p><div class="tip"><b>Tips:</b> pilih grade sesuai hasil pengecekan kondisi unit, bukan perkiraan. Nilai tiap grade berbeda untuk setiap model.</div></div></details>
   <details class="dt"><summary><span class="nn">3</span>Qoala Protection</summary><div class="dc"><p>Daftar tier otomatis dibatasi sesuai <b>range harga device</b>, sehingga hanya tier yang cocok yang tampil. Pilih tier dan tenor proteksi; biayanya ditambahkan ke total.</p></div></details>
   <details class="dt"><summary><span class="nn">4</span>Provider</summary><div class="dc"><p>Pilih <b>brand</b> provider, lalu <b>Paket</b>. Harga paket ditambahkan ke total bayar. Lewati bila customer tidak mengambil paket provider.</p></div></details>
-  <details class="dt"><summary><span class="nn">5</span>Metode Pembayaran</summary><div class="dc"><p>Pilih salah satu:</p><ul><li><b>Financing</b>: pilih penyedia, <b>Tenor</b>, <b>DP</b>, dan <b>Biaya Admin</b>. Cicilan dihitung dari harga device dikurangi trade in dan DP, dibagi tenor.</li><li><b>Kartu Kredit</b>: pilih bank dan tenor cicilan 0%. Estimasi cicilan device per bulan langsung tampil.</li></ul></div></details>
-  <details class="dt"><summary><span class="nn">6</span>Promo</summary><div class="dc"><p>Aktif setelah memilih <b>Kartu Kredit</b>. Hanya promo bank yang cocok dengan kartu, <b>Purchase Amount</b> (batas minimal dan maksimal), dan yang periodenya belum berakhir yang ditampilkan.</p><ul><li><b>Direct Discount</b>: langsung mengurangi total bayar.</li><li><b>CB by Billing</b>: cashback setelah tagihan; tampil sebagai "Net setelah cashback".</li></ul><div class="tip"><b>Catatan:</b> Financing tidak menampilkan promo kartu bank. Promo Samsung sengaja tidak dihitung di kalkulator ini.</div></div></details>
+  <details class="dt"><summary><span class="nn">5</span>Metode Pembayaran</summary><div class="dc"><p>Pilih salah satu dari tiga metode:</p><ul><li><b>Financing</b>: pilih penyedia, <b>Tenor</b>, <b>DP</b>, dan <b>Biaya Admin</b>. Cicilan dihitung dari harga device dikurangi trade in dan DP, dibagi tenor.</li><li><b>Kartu Kredit</b>: pilih bank, lalu tenor cicilan 0% yang tersedia untuk bank itu. Daftar bank dan tenor mengikuti tab <b>BANK</b> di file master.</li><li><b>Kartu Debit</b>: pilih bank. Kartu debit <b>dibayar penuh langsung</b>, tanpa pembagian cicilan, sehingga yang tampil adalah total bayar.</li></ul></div></details>
+  <details class="dt"><summary><span class="nn">6</span>Promo</summary><div class="dc"><p>Aktif setelah memilih <b>Kartu Kredit</b> atau <b>Kartu Debit</b>. Daftar hanya memuat promo bank yang <b>sesuai kartu terpilih</b>, yang <b>Purchase Amount</b>-nya (harga device promo) ada di antara batas minimal dan maksimal promo, dan yang periodenya belum berakhir. Data promo selalu mengikuti tab <b>Promo Berjalan</b>.</p><p>Tiap promo ditampilkan sebagai: <b>promo • bank • scheme • nominal diskon/cashback • periode</b>. Ketuk satu promo untuk memilihnya.</p><ul><li><b>Direct Discount</b>: langsung memotong harga device. Rinciannya terlihat di Rincian Simulasi (potongan dan harga device setelah promo bank), dan cicilan ikut turun.</li><li><b>CB by Billing</b>: tetap dirinci di simulasi tetapi <b>tidak memotong</b> pembayaran. Cashback diberikan bank kepada customer <b>minimal 3 bulan setelah periode promo berakhir</b>.</li></ul><div class="tip"><b>Catatan:</b> Financing tidak menampilkan promo bank. Promo Samsung sengaja tidak dihitung di kalkulator ini.</div></div></details>
   <details class="dt"><summary><span class="nn">7</span>Rincian Simulasi &amp; Sales Talk</summary><div class="dc"><p>Rincian Simulasi (kolom kanan di desktop, kartu biru di ponsel) merangkum seluruh komponen. <b>Saran Sales Talk</b> tersusun otomatis dari pilihan Anda.</p><ul><li><b>COPY SALES TALK</b>: menyalin teks sales talk.</li><li><b>BAGIKAN</b>: membuka menu bagikan berisi ringkasan lengkap (device, harga, trade in, metode, promo, total).</li></ul></div></details>
  </div>
  <div class="h2"><i></i>Membaca Rincian Simulasi</div>
  <div class="card"><table class="tbl">
   <tr><td>Harga normal</td><td>Harga resmi dari Price List (dicoret bila ada promo).</td></tr>
   <tr><td>Potongan promo device</td><td>Selisih harga normal dan harga promo device.</td></tr>
+  <tr><td>Direct Discount</td><td>Promo bank yang langsung memotong harga device (menghasilkan "Harga device setelah promo bank").</td></tr>
+  <tr><td>Cashback by Billing</td><td>Hanya informasi: tidak mengurangi total bayar. Cashback dari bank minimal 3 bulan setelah promo berakhir.</td></tr>
   <tr><td>Qoala / Provider</td><td>Biaya proteksi dan paket provider yang dipilih (ditambahkan).</td></tr>
   <tr><td>Trade In / DP</td><td>Nilai trade in dan uang muka (mengurangi pokok cicilan).</td></tr>
   <tr><td>Biaya Admin</td><td>Hanya untuk Financing, ditambahkan ke total bayar.</td></tr>
@@ -451,15 +488,17 @@ details.dt .dc li{margin:3px 0}
  </table></div>
  <div class="h2"><i></i>Tombol &amp; menu</div>
  <div class="card btnlist">
-  <div class="bl"><div class="bi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div><div><b>Menu (☰)</b><p>Membuka sidebar: Home, Guide, About, Admin, pengaturan tampilan dan getaran, serta Contributors.</p></div></div>
-  <div class="bl"><div class="bi"><svg viewBox="0 0 24 24" fill="currentColor" style="color:var(--accent)"><path d="M8 5.2v13.6a1 1 0 0 0 1.5.86l11-6.8a1 1 0 0 0 0-1.72l-11-6.8A1 1 0 0 0 8 5.2z"/></svg></div><div><b>Run (▶)</b><p>Menjalankan sinkronisasi harga dan promo dari file master. Tunggu sekitar 20 detik (ada hitung mundur), lalu tap Refresh.</p></div></div>
+  <div class="bl"><div class="bi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div><div><b>Menu (☰)</b><p>Membuka sidebar: Home, Guide, About, Admin, pengaturan tampilan dan getaran, serta Credits.</p></div></div>
+  <div class="bl"><div class="bi"><svg viewBox="0 0 24 24" fill="currentColor" style="color:var(--accent)"><path d="M8 5.2v13.6a1 1 0 0 0 1.5.86l11-6.8a1 1 0 0 0 0-1.72l-11-6.8A1 1 0 0 0 8 5.2z"/></svg></div><div><b>Run (▶)</b><p><b>Khusus admin.</b> Tap Run, masukkan password admin, lalu sinkronisasi harga dan promo dari file master berjalan. Tunggu sekitar 20 detik (ada hitung mundur), kemudian tap Refresh.</p></div></div>
   <div class="bl"><div class="bi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4.5V11h-6.5"/></svg></div><div><b>Refresh (↻)</b><p>Memuat data terbaru ke kalkulator. Jika belum berubah, tunggu sebentar (situs bisa butuh hingga 1 menit) lalu tap lagi.</p></div></div>
   <div class="bl"><div class="bi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2"/></svg></div><div><b>Tampilan &amp; Getaran</b><p>Pilih Auto, Terang, atau Gelap di sidebar. Getaran bisa dimatikan kapan saja.</p></div></div>
  </div>
  <div class="h2"><i></i>Pertanyaan umum</div>
  <div>
   <details class="dt"><summary>Harga atau promo belum berubah setelah file master diedit</summary><div class="dc"><p>Tap <b>Run</b>, tunggu hitung mundur selesai, lalu tap <b>Refresh</b>. Bila masih sama, tunggu ±1 menit dan Refresh lagi. Pastikan file master sudah tersimpan.</p></div></details>
-  <details class="dt"><summary>Promo bank tidak muncul</summary><div class="dc"><ul><li>Pilih metode <b>Kartu Kredit</b> dan bank yang sesuai.</li><li>Cek <b>Purchase Amount</b> berada di antara batas minimal dan maksimal promo.</li><li>Periode promo mungkin sudah berakhir (otomatis disembunyikan).</li></ul></div></details>
+  <details class="dt"><summary>Promo bank tidak muncul</summary><div class="dc"><ul><li>Pilih metode <b>Kartu Kredit</b> atau <b>Kartu Debit</b> lalu pilih banknya.</li><li>Cek <b>Purchase Amount</b> berada di antara batas minimal dan maksimal promo.</li><li>Periode promo mungkin sudah berakhir (otomatis disembunyikan).</li><li>Promo kartu debit hanya tampil untuk Kartu Debit, dan sebaliknya.</li></ul></div></details>
+  <details class="dt"><summary>Kenapa tiba-tiba keluar (logout)?</summary><div class="dc"><p>Sesi staff otomatis berakhir bila tidak ada aktivitas selama 15 menit. Login kembali dengan password staff.</p></div></details>
+  <details class="dt"><summary>Tombol Run meminta password</summary><div class="dc"><p>Run hanya boleh dijalankan admin, jadi setiap tap Run meminta password admin.</p></div></details>
   <details class="dt"><summary>Harga device berbeda dengan yang saya harapkan</summary><div class="dc"><p>Buka dropdown <b>Varian / Warna</b> dan pilih unit yang tepat. Satu tipe bisa punya beberapa baris dengan harga berbeda.</p></div></details>
   <details class="dt"><summary>Lupa password</summary><div class="dc"><p>Hubungi admin. Admin dapat mengganti password staff di menu <b>Admin</b>, dan perubahan berlaku untuk semua staff.</p></div></details>
   <details class="dt"><summary>Getaran tidak terasa</summary><div class="dc"><ul><li>iPhone/iPad: aktifkan <b>Settings → Sounds &amp; Haptics → System Haptics</b>. Versi iOS terbaru hanya merespons sentuhan langsung pada tombol, jadi gunakan ketukan jari biasa.</li><li>Android: pastikan getar sentuhan aktif di pengaturan perangkat.</li><li>Laptop/desktop tidak memiliki motor getar.</li></ul></div></details>
@@ -521,6 +560,16 @@ details.dt .dc li{margin:3px 0}
 </section>
 
 <div class="actions hide" id="actions"><button class="action" onclick="copyTalk()">COPY SALES TALK</button><button class="action primary" onclick="shareAll()">BAGIKAN</button></div>
+<div class="modal" id="runModal" role="dialog" aria-modal="true" aria-labelledby="runModalTitle" onclick="if(event.target===this)closeRunModal()">
+ <div class="modal-card">
+  <div class="lk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="3"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg></div>
+  <h3 id="runModalTitle">Run sinkronisasi</h3>
+  <p>Khusus admin. Masukkan password admin untuk menjalankan GitHub Action yang memperbarui data dari file master.</p>
+  <input id="runPw" class="control" type="password" placeholder="Password admin" autocomplete="current-password" onkeydown="if(event.key==='Enter')confirmRun()" style="text-align:left">
+  <div class="errtxt" id="runErr" style="margin-top:8px" aria-live="polite"></div>
+  <div class="modal-actions"><button class="btn ghost" type="button" onclick="closeRunModal()">Batal</button><button class="btn" type="button" onclick="confirmRun()">Jalankan</button></div>
+ </div>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </div>
 
@@ -536,7 +585,6 @@ let liveDataVersion='';
 let DATA=null;
 function showLoginOverlay(message=''){document.getElementById('loginOverlay').style.display='flex';document.getElementById('loginPassword').value='';document.getElementById('loginError').textContent=message;}
 function logoutCalculator(message='Sesi berakhir. Silakan login kembali.'){clearLoginSession();showLoginOverlay(message)}
-function scheduleAutoLogout(){if(autoLogoutTimer)clearTimeout(autoLogoutTimer);const loginAt=Number(sessionStorage.getItem('maptech_login_at')||0);if(!loginAt)return;const remaining=SESSION_DURATION_MS-(Date.now()-loginAt);if(remaining<=0){logoutCalculator('Sesi 15 menit telah berakhir. Silakan login kembali.');return;}autoLogoutTimer=setTimeout(()=>logoutCalculator('Sesi 15 menit telah berakhir. Silakan login kembali.'),remaining)}
 function setStatus(text){const el=document.getElementById('updatedText');if(el)el.textContent=text}
 function normalizePromoData(){if(!DATA)return;DATA.card_options=(Array.isArray(DATA.card_options)?DATA.card_options:[]).filter(c=>!IGNORE_PROMO_KEYWORDS.some(k=>String(c.name||'').toLowerCase().includes(k)));DATA.promos=(Array.isArray(DATA.promos)?DATA.promos:[]).map(x=>({...x,key:`${x.promo}|${x.period}|${x.scheme}|${x.min}|${x.max}|${x.discount}`}))}
 function formatUpdated(s){const d=new Date(s);if(!s||isNaN(d))return s||'-';return d.toLocaleString('id-ID',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}
@@ -594,8 +642,6 @@ function normalizeBank(s){return String(s||'').toLowerCase().replace(/bank\s*/g,
 function quoteBase(){const p=selectedProduct();if(!p)return {};const device=Number(p.promo_price||p.normal_price||0),normal=Number(p.normal_price||0),trade=Math.max(0,Number(state.tradein)||0);const q=DATA.qoala.find(x=>x.article===state.qoala);const qTotal=q?Number(q.repricing||q.current||q.reference||0):0;const prov=DATA.providers.find(x=>x.article===state.providerItem);const provTotal=prov?Number(prov.repricing||prov.current||prov.reference||0):0;const admin=state.payment==='financing'?Math.max(0,Number(state.admin)||0):0;const dp=state.payment==='financing'?Math.max(0,Number(state.dp)||0):0;const promoBase=Math.max(0,device);return {p,device,normal,deviceDisc:Math.max(0,normal-device),trade,q,qTotal,prov,provTotal,admin,dp,promoBase}}
 function todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function promoActive(x){if(IGNORE_PROMO_KEYWORDS.some(k=>String(x.promo||'').toLowerCase().includes(k)))return false;return !x.end_date||x.end_date>=todayISO()}
-function selectedPromoOptions(){if(state.payment!=='card'||!state.card)return [];const q=quoteBase();return arr(DATA.promos).filter(x=>normalizeBank(x.bank)===normalizeBank(state.card)&&Number(q.promoBase||0)>=Number(x.min||0)&&Number(q.promoBase||0)<=Number(x.max||999999999)&&promoActive(x)).map(x=>({...x,key:`${x.promo}|${x.period}|${x.scheme}|${x.min}|${x.max}|${x.discount}`}))}
-function quote(){const b=quoteBase();if(!b.p)return {};let principal=Math.max(0,b.device-b.trade),upfront=0,monthly=0,methodLabel='';if(state.payment==='financing'){upfront=b.dp;principal=Math.max(0,b.device-b.trade-b.dp);monthly=state.tenor?principal/state.tenor:0;methodLabel=`${state.financing||'Financing'} ${state.tenor} bulan`}else{monthly=state.tenor?principal/state.tenor:0;methodLabel=`${state.card||'Kartu Kredit'} ${state.tenor} bulan`}const promoOptions=selectedPromoOptions();let promo=null;if(state.promo){promo=promoOptions.find(x=>String(x.key)===String(state.promo))||null;}const directDiscount=promo&&promo.scheme==='Direct Discount'?Number(promo.discount||0):0;const billingCashback=promo&&promo.scheme==='CB by Billing'?Number(promo.discount||0):0;const qMonthly=b.q&&b.q.qoala_tenor===Number(state.tenor)?b.qTotal/state.tenor:null;const provMonthly=state.tenor?b.provTotal/state.tenor:0;const subtotal=Math.max(0,b.device-b.trade+(state.payment==='financing'?b.admin:0)+b.qTotal+b.provTotal);const total=Math.max(0,subtotal-directDiscount);const netAfterBilling=Math.max(0,total-billingCashback);const monthlyAll=state.tenor?Math.max(0,(Math.max(0,b.device-b.trade+(state.payment==='financing'?0:0)- (state.payment==='financing'?b.dp:0)+b.qTotal+b.provTotal-directDiscount))/state.tenor):0;return {...b,principal,upfront,monthly,methodLabel,promo,promoOptions,directDiscount,billingCashback,subtotal,total,netAfterBilling,qMonthly,provMonthly,monthlyAll}}
 function eligibleQoala(){const p=selectedProduct();if(!p)return [];const price=Number(p.promo_price||p.normal_price||0);const all=arr(DATA.qoala).filter(q=>Number(q.max_device||0)>=price).sort((a,b)=>Number(a.max_device||0)-Number(b.max_device||0));if(!all.length)return [];const minMax=Number(all[0].max_device);return all.filter(q=>Number(q.max_device)===minMax)}
 function autoQoala(){const eligible=eligibleQoala();if(!eligible.length){state.qoala='';return}const keep=eligible.find(x=>x.article===state.qoala);if(!keep){const match=eligible.find(x=>x.qoala_tenor===Number(state.tenor));state.qoala=(match||eligible[0]).article}}
 function providerBrands(){return [...new Set(arr(DATA.providers).map(p=>p.brand))].sort()}
@@ -616,17 +662,14 @@ function render(){ensureSelection();autoQoala();renderTabs();const p=selectedPro
  html+=`<section class="card c-trade"><div class="section-head"><div class="step">2</div><div><div class="section-title">Trade In</div><div class="section-sub">Pilih merk, tipe, lalu grade</div></div></div><div class="grid"><div class="field"><label class="label">Merk HP</label><select class="control" onchange="setTradeBrand(this.value)">${options(tradeBrands().map(x=>({value:x,label:fmtBrand(x)})),state.tradeBrand,'Pilih merk HP…')}</select></div><div class="field"><label class="label">Tipe HP</label><select class="control" onchange="setTradeModel(this.value)" ${state.tradeBrand?'':'disabled'}>${options(tradeModels().map(x=>({value:x.model,label:fmtName(x.model)})),state.tradeModel,'Pilih tipe HP…')}</select></div><div class="field full"><label class="label">Grade & Harga</label><select class="control" onchange="setTradeGrade(this.value)" ${state.tradeModel?'':'disabled'}>${options(tradeGrades(),state.tradeGrade,'Pilih grade…')}</select></div></div><div class="mini-note">Trade In terpilih: <strong>${state.tradeBrand&&state.tradeModel&&state.tradeGrade?esc(`${fmtBrand(state.tradeBrand)} / ${fmtName(state.tradeModel)} / Grade ${state.tradeGrade} — ${IDR(state.tradein)}`):'Belum dipilih'}</strong></div></section>`;
  html+=`<section class="card c-qoala"><div class="section-head"><div class="step">3</div><div><div class="section-title">Qoala Protection</div><div class="section-sub">Hanya menampilkan tier yang sesuai range harga device</div></div></div><div class="field"><label class="label">Tier Qoala</label><select class="control" onchange="state.qoala=this.value;state.promo='';refreshSummary()"><option value="">Tidak pakai Qoala</option>${qopts.map(x=>`<option value="${esc(x.article)}" ${x.article===state.qoala?'selected':''}>${esc(x.description)} — ${IDR(x.repricing||x.current||x.reference)}</option>`).join('')}</select></div>${q.q?`<div class="pillrow"><span class="pill">${esc(q.q.description)}</span><span class="pill">Harga ${IDR(q.qTotal)}</span>${q.qMonthly!==null?`<span class="pill">${IDR(q.qMonthly)}/bulan</span>`:''}</div>`:`<div class="small">Contoh Rp15.999.000 hanya menampilkan tier Emerald (Max Rp20.000.000), bukan seluruh tier.</div>`}</section>`;
  html+=`<section class="card c-provider"><div class="section-head"><div class="step">4</div><div><div class="section-title">Provider</div><div class="section-sub">Pilih brand dan paket</div></div></div><div class="grid"><div class="field"><label class="label">Provider</label><select class="control" onchange="state.provider=this.value;state.providerItem='';state.promo='';render()">${options(providerBrands().map(x=>({value:x,label:x})),state.provider,'Pilih provider…')}</select></div><div class="field"><label class="label">Paket</label><select class="control" onchange="state.providerItem=this.value;state.promo='';refreshSummary()" ${state.provider?'':'disabled'}>${options(providerItems().map(x=>({value:x.article,label:`${x.description} — ${IDR(x.repricing||x.current||x.reference)}`})),state.providerItem,'Pilih paket…')}</select></div></div>${q.prov?`<div class="pillrow"><span class="pill">${esc(q.prov.brand)}</span><span class="pill">${esc(q.prov.description)}</span><span class="pill">${IDR(q.provTotal)}</span>${state.tenor?`<span class="pill">${IDR(q.provMonthly)}/bulan</span>`:''}</div>`:''}</section>`;
- html+=`<section class="card c-pay"><div class="section-head"><div class="step">5</div><div><div class="section-title">Metode Pembayaran</div><div class="section-sub">Pilih Financing atau Kartu Kredit</div></div></div><div class="payrow"><button class="paybtn ${state.payment==='financing'?'active':''}" onclick="state.payment='financing';state.card='';state.promo='';render()">Financing</button><button class="paybtn ${state.payment==='card'?'active':''}" onclick="state.payment='card';state.financing='';state.promo='';render()">Kartu Kredit</button></div>${state.payment==='financing'?`<div class="grid" style="margin-top:11px"><div class="field full"><label class="label">Financing</label><select class="control" onchange="state.financing=this.value;const z=DATA.bnpl.find(x=>x.name===this.value);state.tenor=z?.tenors?.[0]||3;state.promo='';autoQoala();render()">${options(DATA.bnpl.map(x=>({value:x.name,label:x.name})),state.financing,'Pilih financing…')}</select></div><div class="field"><label class="label">DP</label><input class="control" inputmode="numeric" value="${state.dp||''}" placeholder="0" oninput="state.dp=this.value;refreshSummary()"></div><div class="field"><label class="label">Biaya Admin</label><input class="control" inputmode="numeric" value="${state.admin||''}" placeholder="0" oninput="state.admin=this.value;refreshSummary()"></div><div class="field"><label class="label">Tenor</label><select class="control" onchange="state.tenor=Number(this.value);state.promo='';autoQoala();render()">${options((fin?.tenors||[3,6,12]).map(x=>({value:x,label:x+' bulan'})),state.tenor)}</select></div><div class="field"><label class="label">Estimasi Cicilan Device / bulan</label><input class="control" value="${IDR(q.monthly)}" readonly></div></div>`:`<div class="grid" style="margin-top:11px"><div class="field full"><label class="label">Kartu Kredit</label><select class="control" onchange="state.card=this.value;const c=DATA.card_options.find(x=>x.name===this.value);state.tenor=c?.tenors?.[0]||3;state.promo='';autoQoala();render()">${options(DATA.card_options.map(x=>({value:x.name,label:x.name})),state.card,'Pilih kartu…')}</select></div><div class="field"><label class="label">Tenor</label><select class="control" onchange="state.tenor=Number(this.value);state.promo='';autoQoala();render()">${options((card?.tenors||[3,6,12,18,24]).map(x=>({value:x,label:x+' bulan'})),state.tenor)}</select></div><div class="field"><label class="label">Estimasi Cicilan Device / bulan</label><input class="control" value="${IDR(q.monthly)}" readonly></div></div>`}</section>`;
- html+=`<section class="card c-promo"><div class="section-head"><div class="step">6</div><div><div class="section-title">PROMO</div><div class="section-sub">Promo bank aktif sesuai metode, bank, dan range purchase</div></div></div>${state.payment==='card'?`<div class="grid"><div class="field"><label class="label">Promo ${esc(state.card||'')}</label><select class="control" onchange="state.promo=this.value;refreshSummary()"><option value="">Tidak pakai promo bank</option>${promos.map(x=>{return `<option value="${esc(x.key)}" ${q.promo&&q.promo.key===x.key?'selected':''}>${esc(x.promo)} • ${esc(x.scheme)} • ${esc(x.period)} • ${IDR(x.discount)}</option>`}).join('')}</select></div><div class="field"><label class="label">Purchase Amount</label><input class="control" value="${IDR(q.promoBase||0)}" readonly></div></div>${q.promo?`<div class="pillrow"><span class="pill">${esc(q.promo.promo)}</span><span class="pill">${esc(q.promo.scheme)}</span><span class="pill">Periode: ${esc(q.promo.period)}</span><span class="pill">Min ${IDR(q.promo.min)}</span><span class="pill">Max ${IDR(q.promo.max)}</span><span class="pill">${q.promo.scheme==='Direct Discount'?'Potong sekarang':'Cashback di billing'}: ${IDR(q.promo.discount)}</span></div>`:`<div class="mini-note">Promo hanya menampilkan promo bank yang sesuai dengan kartu dan purchase amount. BSI akan cocok dengan promo bank "BSI" meskipun nama kartu ditulis berbeda.</div>`}`:`<div class="mini-note">PROMO bank aktif setelah memilih Kartu Kredit. Financing tidak menampilkan promo kartu bank.</div>`}</section>`;
+ html+=payStepHtml(q,fin,card);
+ html+=promoStepHtml(q,promos);
  html+='</div><aside class="col-side">';
  html+=`<section class="card summary"><div class="section-head"><div class="step">✓</div><div><div class="section-title">Rincian Simulasi</div><div class="section-sub">Ringkasan seluruh promo & komponen customer</div></div></div>${summaryHtml(q)}</section>`;
  html+=`<section class="card c-talk"><div class="section-head"><div class="step">7</div><div><div class="section-title">Saran Sales Talk</div><div class="section-sub">Jelas, natural, dan tetap lengkap</div></div></div><div class="talk" id="salesTalk">${esc(salesTalk(q))}</div></section>`;
  html+='</aside>';document.getElementById('app').innerHTML=html;document.getElementById('actions').classList.remove('hide');}
-function summaryHtml(q){if(!q.p)return '<div class="empty">Pilih device terlebih dahulu.</div>';const promoLine=q.promo?(q.promo.scheme==='Direct Discount'?`<div class="srow"><span>PROMO BANK (${esc(state.card)}) - Direct Discount</span><strong class="green">-${IDR(q.directDiscount)}</strong></div>`:`<div class="srow"><span>PROMO BANK (${esc(state.card)}) - Billing statement</span><strong class="green">-${IDR(q.billingCashback)}</strong></div>`):'';return `<div class="rows"><div class="srow"><span>Harga normal</span><strong class="strike">${IDR(q.normal)}</strong></div><div class="srow"><span>Potongan promo device</span><strong class="green">-${IDR(q.deviceDisc)}</strong></div><div class="srow"><span>Harga device promo</span><strong>${IDR(q.device)}</strong></div><div class="srow"><span>Qoala</span><strong>+${IDR(q.qTotal)}</strong></div><div class="srow"><span>Provider</span><strong>+${IDR(q.provTotal)}</strong></div><div class="srow"><span>Trade In ${state.tradeGrade?`(Grade ${esc(state.tradeGrade)})`:''}</span><strong>-${IDR(q.trade)}</strong></div>${state.payment==='financing'?`<div class="srow"><span>DP</span><strong>-${IDR(q.upfront)}</strong></div><div class="srow"><span>Biaya Admin</span><strong>+${IDR(q.admin)}</strong></div>`:''}${promoLine}<div class="srow total"><span>Total Bayar Customer</span><strong>${IDR(q.total)}</strong></div>${q.billingCashback?`<div class="srow"><span>Net setelah cashback billing</span><strong class="green">${IDR(q.netAfterBilling)}</strong></div>`:''}<div class="srow"><span>Estimasi beban / bulan</span><strong>${IDR(q.monthlyAll)}</strong></div></div><div class="big">${IDR(q.monthlyAll)} / bulan</div><div class="tiny">Metode: ${esc(q.methodLabel)}${q.promo?` • ${esc(q.promo.promo)} • ${esc(q.promo.scheme)}`:''}</div>`}
-function salesTalk(q){if(!q.p)return 'Pilih device terlebih dahulu untuk membuat sales talk.';const p=q.p;const lines=[];lines.push(`Kak, estimasi cicilannya kurang lebih ${IDR(q.monthlyAll)} per bulan dengan ${q.methodLabel}. Dengan angka tersebut, Kakak sudah mendapatkan ${p.description} dengan harga promo ${IDR(q.device)}.`);if(q.deviceDisc>0)lines.push(`Harga normalnya ${IDR(q.normal)}, jadi sudah hemat ${IDR(q.deviceDisc)} dari promo device.`);if(q.trade)lines.push(`Kalau Trade In ${fmtBrand(state.tradeBrand)} ${fmtName(state.tradeModel)} Grade ${state.tradeGrade}, ada tambahan pengurangan ${IDR(q.trade)}.`);if(q.q)lines.push(`Untuk proteksi, ada ${q.q.description} sebesar ${IDR(q.qTotal)}${q.qMonthly?` atau sekitar ${IDR(q.qMonthly)} per bulan`:''}.`);if(q.prov)lines.push(`Benefit provider ${q.prov.brand} ${q.prov.description} sebesar ${IDR(q.provTotal)}${q.provMonthly?` atau ${IDR(q.provMonthly)} per bulan`:''}.`);if(state.payment==='financing')lines.push(`Pembayaran melalui ${state.financing||'Financing'} ${state.tenor} bulan, dengan DP ${IDR(q.upfront)} dan admin ${IDR(q.admin)}.`);else lines.push(`Pembayaran menggunakan ${state.card} tenor ${state.tenor} bulan.`);if(q.promo){if(q.promo.scheme==='Direct Discount')lines.push(`Ada promo ${q.promo.promo}: potongan langsung ${IDR(q.directDiscount)}, sehingga total bayar menjadi ${IDR(q.total)}.`);else lines.push(`Ada promo ${q.promo.promo}: cashback ${IDR(q.billingCashback)} yang masuk ke billing statement ${state.card}.`);}else lines.push('Belum ada promo bank yang dipilih.');return lines.join('\n')}
 function refreshSummary(){const el=document.querySelector('.summary');if(!el)return;const q=quote();el.innerHTML=`<div class="section-head"><div class="step">✓</div><div><div class="section-title">Rincian Simulasi</div><div class="section-sub">Ringkasan seluruh promo & komponen customer</div></div></div>`+summaryHtml(q);const t=document.getElementById('salesTalk');if(t)t.textContent=salesTalk(q)}
 async function copyTalk(){const text=salesTalk(quote());try{await navigator.clipboard.writeText(text);alert('Sales talk berhasil dicopy.')}catch(e){prompt('Copy Sales Talk:',text)}}
-async function shareAll(){const q=quote();const text=`KALKULATOR PROMO APPLE\n\nDevice: ${q.p?.description||'-'}\nHarga normal: ${IDR(q.normal)}\nHarga promo: ${IDR(q.device)}\nTrade In: ${state.tradeBrand?fmtBrand(state.tradeBrand)+' / '+fmtName(state.tradeModel)+' / Grade '+state.tradeGrade+' = '+IDR(q.trade):'Tidak dipilih'}\nMetode: ${q.methodLabel||'-'}\nQoala: ${q.q?q.q.description+' — '+IDR(q.qTotal):'Tidak dipilih'}\nProvider: ${q.prov?q.prov.description+' — '+IDR(q.provTotal):'Tidak dipilih'}\nPromo: ${q.promo?q.promo.promo+' — '+q.promo.scheme+' — '+IDR(q.promo.discount):'Tidak dipilih'}\nTotal bayar: ${IDR(q.total)}\n${q.billingCashback?'Net setelah cashback billing: '+IDR(q.netAfterBilling)+'\n':''}Estimasi / bulan: ${IDR(q.monthlyAll)}\n\nSALES TALK\n${salesTalk(q)}`;if(navigator.share){try{await navigator.share({title:'Simulasi Promo Apple',text})}catch(e){}}else{try{await navigator.clipboard.writeText(text);alert('Rincian sudah dicopy.')}catch(e){prompt('Bagikan rincian:',text)}}}
 /* ===== Tampilan: Auto / Terang / Gelap ===== */
 const $i=id=>document.getElementById(id);
 const THEME_KEY='maptech_theme';
@@ -803,8 +846,8 @@ function ses(k,v){if(v===undefined)return sessionStorage.getItem(k);if(v===null)
 function secretVer(role){const r=role==='admin'?ACCESS.admin:ACCESS.staff;return r.v||''}
 function sessionValid(){return ses('maptech_logged_in')==='1'&&!!ACCESS&&(ses('maptech_ver')||'')===secretVer(ses('maptech_role')||'staff')}
 function isAdmin(){return !!ACCESS&&ses('maptech_adminver')!==null&&ses('maptech_adminver')===(ACCESS.admin.v||'')}
-function setLoginSession(role,ver){ses('maptech_logged_in','1');ses('maptech_login_at',String(Date.now()));ses('maptech_role',role);ses('maptech_ver',ver||'');if(role==='admin')ses('maptech_adminver',ver||'');scheduleAutoLogout();startLiveSync();applyRoleUI()}
-function clearLoginSession(){['maptech_logged_in','maptech_login_at','maptech_role','maptech_ver','maptech_adminver'].forEach(k=>ses(k,null));if(autoLogoutTimer){clearTimeout(autoLogoutTimer);autoLogoutTimer=null}stopLiveSync();applyRoleUI()}
+function setLoginSession(role,ver){ses('maptech_logged_in','1');ses('maptech_role',role);ses('maptech_ver',ver||'');if(role==='admin')ses('maptech_adminver',ver||'');scheduleAutoLogout();startLiveSync();applyRoleUI()}
+function clearLoginSession(){['maptech_logged_in','maptech_last','maptech_role','maptech_ver','maptech_adminver'].forEach(k=>ses(k,null));if(autoLogoutTimer){clearInterval(autoLogoutTimer);autoLogoutTimer=null}stopLiveSync();applyRoleUI()}
 function applyRoleUI(){const b=$i('adminBadge');if(b)b.textContent=isAdmin()?'Terbuka':'Terkunci';if(currentPage==='admin')renderAdmin()}
 function checkSessionAgainstAccess(){
   if(ses('maptech_logged_in')!=='1'||!ACCESS)return;
@@ -824,8 +867,8 @@ async function doLogin(){
   }catch(e){err.textContent=e.message||'Gagal memeriksa password.'}
 }
 function enforceLogin(){
-  const at=Number(ses('maptech_login_at')||0);
-  if(at&&sessionValid()&&SESSION_DURATION_MS-(Date.now()-at)>0){$i('loginOverlay').style.display='none';scheduleAutoLogout();startLiveSync();applyRoleUI();return}
+  const at=Number(ses('maptech_last')||0);
+  if(at&&sessionValid()&&IDLE_MS-(Date.now()-at)>0){$i('loginOverlay').style.display='none';scheduleAutoLogout();startLiveSync();applyRoleUI();return}
   clearLoginSession();showLoginOverlay('Silakan masukkan password untuk memulai sesi 15 menit.');
 }
 function startLiveSync(){
@@ -903,10 +946,6 @@ function setSidebar(open){
 function toggleSidebar(){haptic();setSidebar(!$i('sidebar').classList.contains('open'))}
 function closeSidebar(){setSidebar(false)}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSidebar()});
-function toggleCredits(force){
-  const c=$i('credits'),open=typeof force==='boolean'?force:!c.classList.contains('open');
-  c.classList.toggle('open',open);$i('creditsToggle').setAttribute('aria-expanded',String(open));
-}
 function go(p){haptic();showPage(p);closeSidebar()}
 function showPage(p){
   currentPage=p;
@@ -982,6 +1021,136 @@ async function initApp(){
   setStatus('Memuat data…');initHapticUI();hxWrap(document);showPage('home');
   await loadAccess();enforceLogin();loadLiveData(false);
 }
+
+/* ===== v4: promo, pembayaran (kredit/debit/financing), rincian, idle-logout, Run khusus admin ===== */
+const CB_NOTE='Cashback by Billing tidak memotong pembayaran saat transaksi. Cashback diberikan oleh bank kepada customer minimal 3 bulan setelah periode promo ini berakhir.';
+function schemeKind(s){s=String(s||'');if(/direct/i.test(s))return 'direct';if(/cb|cashback|billing/i.test(s))return 'cb';return 'other'}
+function isDebitPromo(x){return /debit/i.test(x.bank||'')}
+function bankKey(s){return normalizeBank(String(s||'').replace(/debit/ig,''))}
+function creditBanks(){return arr(DATA.card_options).filter(x=>arr(x.tenors).length)}
+function debitBanks(){return arr(DATA.debit_options&&DATA.debit_options.length?DATA.debit_options:DATA.card_options)}
+function selectedPromoOptions(){
+  if(!['card','debit'].includes(state.payment)||!state.card)return [];
+  const base=Number(quoteBase().promoBase||0),debit=state.payment==='debit',k=bankKey(state.card);
+  return arr(DATA.promos).filter(x=>bankKey(x.bank)===k&&isDebitPromo(x)===debit&&base>=Number(x.min||0)&&base<=(Number(x.max)||1e15)&&promoActive(x)).map(x=>({...x,key:`${x.promo}|${x.bank}|${x.period}|${x.scheme}|${x.min}|${x.max}|${x.discount}`}));
+}
+function quote(){
+  const b=quoteBase();if(!b.p)return {};
+  const isFin=state.payment==='financing',isDebit=state.payment==='debit';
+  const promoOptions=selectedPromoOptions();
+  let promo=null;if(state.promo)promo=promoOptions.find(x=>String(x.key)===String(state.promo))||null;
+  const kind=promo?schemeKind(promo.scheme):'';
+  const directDiscount=kind==='direct'?Math.max(0,Number(promo.discount||0)):0;
+  const billingCashback=kind==='cb'?Math.max(0,Number(promo.discount||0)):0;
+  const deviceAfterPromo=Math.max(0,b.device-directDiscount);
+  const tenor=isDebit?0:(Number(state.tenor)||0);
+  let principal=Math.max(0,deviceAfterPromo-b.trade),upfront=0,methodLabel='';
+  if(isFin){upfront=b.dp;principal=Math.max(0,deviceAfterPromo-b.trade-b.dp);methodLabel=`${state.financing||'Financing'} ${tenor} bulan`}
+  else if(isDebit)methodLabel=`Kartu Debit${state.card?' '+state.card:''} (bayar penuh)`;
+  else methodLabel=`${state.card||'Kartu Kredit'} ${tenor} bulan`;
+  const monthly=tenor?principal/tenor:0;
+  const qMonthly=b.q&&tenor&&b.q.qoala_tenor===tenor?b.qTotal/tenor:null;
+  const provMonthly=tenor?b.provTotal/tenor:0;
+  const subtotal=Math.max(0,b.device-b.trade+(isFin?b.admin:0)+b.qTotal+b.provTotal);
+  const total=Math.max(0,subtotal-directDiscount);
+  const netAfterBilling=Math.max(0,total-billingCashback);
+  const monthlyAll=tenor?Math.max(0,deviceAfterPromo-b.trade-(isFin?b.dp:0)+b.qTotal+b.provTotal)/tenor:0;
+  return {...b,principal,upfront,monthly,methodLabel,promo,promoKind:kind,promoOptions,directDiscount,billingCashback,deviceAfterPromo,subtotal,total,netAfterBilling,qMonthly,provMonthly,monthlyAll,isDebit,tenor};
+}
+function setPayment(m){state.payment=m;if(m!=='financing')state.financing='';state.card='';state.promo='';state.tenor=m==='debit'?0:3;autoQoala();render()}
+function pickCard(v){state.card=v;const c=arr(DATA.card_options).find(x=>x.name===v);state.tenor=(c&&c.tenors&&c.tenors[0])||3;state.promo='';autoQoala();render()}
+function pickDebit(v){state.card=v;state.tenor=0;state.promo='';autoQoala();render()}
+function setPromoIdx(i){
+  const o=i>=0?selectedPromoOptions()[i]:null;state.promo=o?o.key:'';
+  document.querySelectorAll('.pitem').forEach((el,n)=>{const on=i<0?el.classList.contains('none'):(n-1===i);el.classList.toggle('sel',on);el.setAttribute('aria-checked',String(on))});
+  refreshSummary();const d=$i('promoDetail');if(d)d.innerHTML=promoDetailHtml(quote());
+}
+function promoDetailHtml(q){
+  if(!q.promo)return '';
+  if(q.promoKind==='direct')return `<div class="mini-note"><b>Direct Discount:</b> langsung memotong harga device sebesar <b>${IDR(q.directDiscount)}</b> (harga device menjadi <b>${IDR(q.deviceAfterPromo)}</b>). Rinciannya ada di Rincian Simulasi.</div>`;
+  if(q.promoKind==='cb')return `<div class="mini-note"><b>CB by Billing:</b> estimasi cashback <b>${IDR(q.billingCashback)}</b>. ${esc(CB_NOTE)} Karena itu total bayar saat transaksi <b>tidak berkurang</b>; perkiraan bersih setelah cashback <b>${IDR(q.netAfterBilling)}</b>.</div>`;
+  return `<div class="mini-note">Scheme "${esc(q.promo.scheme)}" belum dikenali, jadi tidak mengubah perhitungan.</div>`;
+}
+function promoItemHtml(x,i,sel){
+  const kind=schemeKind(x.scheme);
+  return `<button type="button" class="pitem ${sel?'sel':''}" role="radio" aria-checked="${sel?'true':'false'}" onclick="setPromoIdx(${i})"><span class="rad"></span><span class="ptxt"><span class="pl"><b>${esc(x.promo)}</b> • ${esc(x.bank)} • <span class="sch ${kind}">${esc(x.scheme)}</span> • <span class="amt">${IDR(x.discount)}</span> • <span class="per">${esc(x.period||'-')}</span></span>${kind==='cb'?'<span class="pn">Tidak memotong harga. Cashback dari bank minimal 3 bulan setelah promo berakhir.</span>':kind==='direct'?'<span class="pn">Langsung memotong harga device.</span>':''}</span></button>`;
+}
+function payStepHtml(q,fin,card){
+  const pm=state.payment,tb=(m,l)=>`<button class="paybtn ${pm===m?'active':''}" onclick="setPayment('${m}')">${l}</button>`;
+  let body='';
+  if(pm==='financing')body=`<div class="grid" style="margin-top:11px"><div class="field full"><label class="label">Financing</label><select class="control" onchange="state.financing=this.value;const z=DATA.bnpl.find(x=>x.name===this.value);state.tenor=z?.tenors?.[0]||3;state.promo='';autoQoala();render()">${options(DATA.bnpl.map(x=>({value:x.name,label:x.name})),state.financing,'Pilih financing…')}</select></div><div class="field"><label class="label">DP</label><input class="control" inputmode="numeric" value="${state.dp||''}" placeholder="0" oninput="state.dp=this.value;refreshSummary()"></div><div class="field"><label class="label">Biaya Admin</label><input class="control" inputmode="numeric" value="${state.admin||''}" placeholder="0" oninput="state.admin=this.value;refreshSummary()"></div><div class="field"><label class="label">Tenor</label><select class="control" onchange="state.tenor=Number(this.value);state.promo='';autoQoala();render()">${options((fin?.tenors||[3,6,12]).map(x=>({value:x,label:x+' bulan'})),state.tenor)}</select></div><div class="field"><label class="label">Estimasi Cicilan Device / bulan</label><input class="control" value="${IDR(q.monthly)}" readonly></div></div>`;
+  else if(pm==='card'){const banks=creditBanks();body=`<div class="grid" style="margin-top:11px"><div class="field full"><label class="label">Kartu Kredit</label><select class="control" onchange="pickCard(this.value)">${options(banks.map(x=>({value:x.name,label:x.name})),state.card,'Pilih kartu…')}</select></div><div class="field"><label class="label">Tenor</label><select class="control" onchange="state.tenor=Number(this.value);state.promo='';autoQoala();render()">${options(arr(card&&card.tenors).map(x=>({value:x,label:x+' bulan'})),state.tenor)}</select></div><div class="field"><label class="label">Estimasi Cicilan Device / bulan</label><input class="control" value="${IDR(q.monthly)}" readonly></div></div>${banks.length?'':'<div class="mini-note">Belum ada bank dengan tenor di tab BANK.</div>'}`}
+  else body=`<div class="grid" style="margin-top:11px"><div class="field full"><label class="label">Kartu Debit</label><select class="control" onchange="pickDebit(this.value)">${options(debitBanks().map(x=>({value:x.name,label:x.name})),state.card,'Pilih bank kartu debit…')}</select></div></div><div class="mini-note">Kartu debit dibayar <b>penuh langsung</b> (tanpa cicilan). Total yang dibayar: <b>${IDR(q.total)}</b>.</div>`;
+  return `<section class="card c-pay"><div class="section-head"><div class="step">5</div><div><div class="section-title">Metode Pembayaran</div><div class="section-sub">Pilih Financing, Kartu Kredit, atau Kartu Debit</div></div></div><div class="payrow p3">${tb('financing','Financing')}${tb('card','Kartu Kredit')}${tb('debit','Kartu Debit')}</div>${body}</section>`;
+}
+function promoStepHtml(q,promos){
+  let body;
+  if(state.payment==='financing')body='<div class="mini-note">Promo bank aktif setelah memilih Kartu Kredit atau Kartu Debit. Financing tidak menampilkan promo bank.</div>';
+  else if(!state.card)body=`<div class="mini-note">Pilih ${state.payment==='debit'?'bank kartu debit':'kartu kredit'} di langkah 5 untuk melihat promo bank yang sesuai.</div>`;
+  else body=`<div class="grid"><div class="field full"><label class="label">Purchase Amount (harga device promo)</label><input class="control" value="${IDR(q.promoBase||0)}" readonly></div></div>`+(promos.length?`<div class="plist" role="radiogroup" aria-label="Promo bank"><button type="button" class="pitem none ${q.promo?'':'sel'}" role="radio" aria-checked="${q.promo?'false':'true'}" onclick="setPromoIdx(-1)"><span class="rad"></span><span class="ptxt"><span class="pl"><b>Tidak pakai promo bank</b></span></span></button>${promos.map((x,i)=>promoItemHtml(x,i,!!(q.promo&&q.promo.key===x.key))).join('')}</div>`:`<div class="mini-note">Tidak ada promo ${esc(state.card)} yang aktif untuk Purchase Amount ${IDR(q.promoBase||0)} saat ini.</div>`)+`<div id="promoDetail">${promoDetailHtml(q)}</div>`;
+  return `<section class="card c-promo"><div class="section-head"><div class="step">6</div><div><div class="section-title">PROMO</div><div class="section-sub">Hanya promo bank yang sesuai kartu terpilih dan range Purchase Amount (min–max)</div></div></div>${body}</section>`;
+}
+function summaryHtml(q){
+  if(!q.p)return '<div class="empty">Pilih device terlebih dahulu.</div>';
+  const fin=state.payment==='financing',deb=q.isDebit;
+  const direct=q.directDiscount>0?`<div class="srow"><span>Promo Direct Discount — ${esc(q.promo.promo)}${state.card?' ('+esc(state.card)+')':''}</span><strong class="green">-${IDR(q.directDiscount)}</strong></div><div class="srow"><span>Harga device setelah promo bank</span><strong>${IDR(q.deviceAfterPromo)}</strong></div>`:'';
+  const cb=q.billingCashback>0?`<div class="srow"><span>Cashback by Billing — ${esc(q.promo.promo)} (dari bank, tidak memotong)</span><strong class="green">${IDR(q.billingCashback)}</strong></div><div class="srow"><span>Perkiraan bersih setelah cashback</span><strong class="green">${IDR(q.netAfterBilling)}</strong></div>`:'';
+  return `<div class="rows"><div class="srow"><span>Harga normal</span><strong class="strike">${IDR(q.normal)}</strong></div><div class="srow"><span>Potongan promo device</span><strong class="green">-${IDR(q.deviceDisc)}</strong></div><div class="srow"><span>Harga device promo</span><strong>${IDR(q.device)}</strong></div>${direct}<div class="srow"><span>Qoala</span><strong>+${IDR(q.qTotal)}</strong></div><div class="srow"><span>Provider</span><strong>+${IDR(q.provTotal)}</strong></div><div class="srow"><span>Trade In ${state.tradeGrade?`(Grade ${esc(state.tradeGrade)})`:''}</span><strong>-${IDR(q.trade)}</strong></div>${fin?`<div class="srow"><span>DP</span><strong>-${IDR(q.upfront)}</strong></div><div class="srow"><span>Biaya Admin</span><strong>+${IDR(q.admin)}</strong></div>`:''}<div class="srow total"><span>Total Bayar Customer</span><strong>${IDR(q.total)}</strong></div>${cb}${deb?'<div class="srow"><span>Cara bayar</span><strong>Bayar penuh (tanpa cicilan)</strong></div>':`<div class="srow"><span>Estimasi beban / bulan</span><strong>${IDR(q.monthlyAll)}</strong></div>`}</div>${q.billingCashback>0?`<div class="tiny">${esc(CB_NOTE)}</div>`:''}<div class="big">${deb?IDR(q.total):IDR(q.monthlyAll)+' / bulan'}</div><div class="tiny">Metode: ${esc(q.methodLabel)}${q.promo?` • ${esc(q.promo.promo)} • ${esc(q.promo.scheme)}`:''}</div>`;
+}
+function salesTalk(q){
+  if(!q.p)return 'Pilih device terlebih dahulu untuk membuat sales talk.';
+  const p=q.p,L=[];
+  if(q.isDebit)L.push(`Kak, total pembayarannya ${IDR(q.total)} dengan ${q.methodLabel}. Dengan angka tersebut, Kakak sudah mendapatkan ${p.description} dengan harga promo ${IDR(q.device)}.`);
+  else L.push(`Kak, estimasi cicilannya kurang lebih ${IDR(q.monthlyAll)} per bulan dengan ${q.methodLabel}. Dengan angka tersebut, Kakak sudah mendapatkan ${p.description} dengan harga promo ${IDR(q.device)}.`);
+  if(q.deviceDisc>0)L.push(`Harga normalnya ${IDR(q.normal)}, jadi sudah hemat ${IDR(q.deviceDisc)} dari promo device.`);
+  if(q.trade)L.push(`Kalau Trade In ${fmtBrand(state.tradeBrand)} ${fmtName(state.tradeModel)} Grade ${state.tradeGrade}, ada tambahan pengurangan ${IDR(q.trade)}.`);
+  if(q.q)L.push(`Untuk proteksi, ada ${q.q.description} sebesar ${IDR(q.qTotal)}${q.qMonthly?` atau sekitar ${IDR(q.qMonthly)} per bulan`:''}.`);
+  if(q.prov)L.push(`Benefit provider ${q.prov.brand} ${q.prov.description} sebesar ${IDR(q.provTotal)}${q.provMonthly?` atau ${IDR(q.provMonthly)} per bulan`:''}.`);
+  if(state.payment==='financing')L.push(`Pembayaran melalui ${state.financing||'Financing'} ${state.tenor} bulan, dengan DP ${IDR(q.upfront)} dan admin ${IDR(q.admin)}.`);
+  else if(q.isDebit)L.push(`Pembayaran menggunakan kartu debit${state.card?' '+state.card:''}, dibayar penuh langsung tanpa cicilan.`);
+  else L.push(`Pembayaran menggunakan kartu kredit ${state.card} tenor ${state.tenor} bulan.`);
+  if(q.promo){
+    if(q.promoKind==='direct')L.push(`Ada promo ${q.promo.promo}: potongan langsung ${IDR(q.directDiscount)}, sehingga harga device menjadi ${IDR(q.deviceAfterPromo)} dan total bayar ${IDR(q.total)}.`);
+    else if(q.promoKind==='cb')L.push(`Ada promo ${q.promo.promo} dari ${q.promo.bank}: cashback ${IDR(q.billingCashback)} (CB by Billing). Cashback tidak memotong pembayaran saat transaksi dan diberikan bank minimal 3 bulan setelah periode promo berakhir.`);
+    else L.push(`Promo ${q.promo.promo} (${q.promo.scheme}) tercatat untuk ${q.promo.bank}.`);
+  }else L.push('Belum ada promo bank yang dipilih.');
+  return L.join('\n');
+}
+async function shareAll(){
+  const q=quote();
+  const promoLine=q.promo?(q.promoKind==='direct'?`${q.promo.promo} — Direct Discount — -${IDR(q.directDiscount)} (memotong harga device)`:q.promoKind==='cb'?`${q.promo.promo} — CB by Billing — ${IDR(q.billingCashback)} (tidak memotong; cashback dari bank minimal 3 bulan setelah promo berakhir)`:`${q.promo.promo} — ${q.promo.scheme}`):'Tidak dipilih';
+  const text=`KALKULATOR PROMO APPLE\n\nDevice: ${q.p?.description||'-'}\nHarga normal: ${IDR(q.normal)}\nHarga promo: ${IDR(q.device)}\nTrade In: ${state.tradeBrand?fmtBrand(state.tradeBrand)+' / '+fmtName(state.tradeModel)+' / Grade '+state.tradeGrade+' = '+IDR(q.trade):'Tidak dipilih'}\nMetode: ${q.methodLabel||'-'}\nQoala: ${q.q?q.q.description+' — '+IDR(q.qTotal):'Tidak dipilih'}\nProvider: ${q.prov?q.prov.description+' — '+IDR(q.provTotal):'Tidak dipilih'}\nPromo: ${promoLine}\nTotal bayar: ${IDR(q.total)}\n${q.billingCashback?'Perkiraan bersih setelah cashback: '+IDR(q.netAfterBilling)+'\n':''}${q.isDebit?'Cara bayar: bayar penuh (tanpa cicilan)':'Estimasi / bulan: '+IDR(q.monthlyAll)}\n\nSALES TALK\n${salesTalk(q)}`;
+  if(navigator.share){try{await navigator.share({title:'Simulasi Promo Apple',text})}catch(e){}}
+  else{try{await navigator.clipboard.writeText(text);alert('Rincian sudah dicopy.')}catch(e){prompt('Bagikan rincian:',text)}}
+}
+
+/* ---- Sesi 15 menit: keluar otomatis bila tidak ada aktivitas ---- */
+const IDLE_MS=window.__IDLE_MS||SESSION_DURATION_MS;
+let lastActWrite=0;
+function touchActivity(force){const n=Date.now();if(!force&&n-lastActWrite<1000)return;lastActWrite=n;if(ses('maptech_logged_in')==='1')ses('maptech_last',String(n))}
+['pointerdown','keydown','touchstart','wheel','scroll','input','click'].forEach(ev=>window.addEventListener(ev,()=>touchActivity(),{passive:true,capture:true}));
+function checkIdle(){if(ses('maptech_logged_in')!=='1')return;const last=Number(ses('maptech_last')||0);if(!last||Date.now()-last>IDLE_MS)logoutCalculator('Sesi berakhir karena tidak ada aktivitas selama 15 menit. Silakan login kembali.')}
+function scheduleAutoLogout(){if(autoLogoutTimer)clearInterval(autoLogoutTimer);touchActivity(true);autoLogoutTimer=setInterval(checkIdle,Math.max(300,Math.min(15000,IDLE_MS/4)))}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkIdle()});
+
+/* ---- Run (▶): khusus admin ---- */
+function openRunModal(){
+  const wait=SYNC_COOLDOWN_MS-(Date.now()-lastDispatchAt);
+  if(wait>0){toast('Sync baru saja dijalankan. Tunggu '+Math.ceil(wait/1000)+' detik lalu tap Refresh.');return}
+  haptic();$i('runPw').value='';$i('runErr').textContent='';$i('runModal').classList.add('show');setTimeout(()=>$i('runPw').focus(),60);
+}
+function closeRunModal(){$i('runModal').classList.remove('show')}
+async function confirmRun(){
+  const pw=$i('runPw').value,err=$i('runErr');
+  if(!pw){err.textContent='Masukkan password admin.';return}
+  err.textContent='Memeriksa…';
+  try{
+    if(!ACCESS)await loadAccess();
+    if(!(await verifyPw(pw,ACCESS.admin))){await sleep(450);err.textContent='Password admin salah. Hanya admin yang dapat menjalankan Run.';return}
+    closeRunModal();runSync();
+  }catch(e){err.textContent=e.message||'Gagal memeriksa password.'}
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeRunModal()});
 
 initApp();
 

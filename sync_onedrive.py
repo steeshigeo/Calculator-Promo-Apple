@@ -19,7 +19,7 @@ Port dari Code.gs (Apps Script) dengan perbaikan:
     - header sheet dibaca tanpa peduli huruf besar/kecil & spasi ganda ("Promotion   Price")
     - baris judul model = kolom A terisi, kolom B & C kosong (tahan sel nyasar)
     - label RAM/Storage Mac (16G/512GB, 24GB/1T, 16GB/256-IND, dst.)
-    - bank di sheet Promo yang belum ada di CARD_MATRIX ditambahkan otomatis
+    - daftar bank + tenor kartu kredit dibaca dari tab BANK (kolom A = bank, C-G = tenor); CARD_MATRIX hanya cadangan
     - tiap promo diberi end_date (dibaca dari kolom Periode) supaya promo lewat tidak ditawarkan
 """
 import argparse
@@ -47,7 +47,9 @@ SHEET_NAMES = {
     "provider": "Provider",
     "qoala": "Qoala Protection",
     "trade": "Trade in",
+    "bank": "BANK",  # opsional: daftar bank + tenor kartu kredit (kolom A = bank, kolom C-G = tenor)
 }
+REQUIRED_SHEETS = ("price", "promo", "bnpl", "provider", "qoala", "trade")
 
 # Tenor cicilan 0% kartu kredit (tidak ada di sheet -> dikelola di sini).
 CARD_MATRIX = [
@@ -66,7 +68,6 @@ CARD_MATRIX = [
     ("Maybank", [3, 6, 12, 24]),
     ("Jenius (BTPN)", [3, 6, 12]),
     ("KB Bank", [3, 6, 12, 18, 24]),
-    ("BRI Debit", [3, 6, 12]),
     ("OCBC", [3, 6, 12]),
 ]
 DEFAULT_NEW_CARD_TENORS = [3, 6, 12]
@@ -131,6 +132,15 @@ def normalize_bank(s):
     s = re.sub(r"\s+cc$", "", s)
     s = re.sub(r"\s+card$", "", s)
     return re.sub(r"\s+", "", s).strip()
+
+
+def find_sheet(sheets, name):
+    """Cari sheet tanpa peduli huruf besar/kecil & spasi."""
+    want = name.strip().lower()
+    for k, v in sheets.items():
+        if k.strip().lower() == want:
+            return v
+    return None
 
 
 # --------------------------------------------------------------------------- download
@@ -218,7 +228,21 @@ def read_sheets(raw):
     if raw[:2] != b"PK":
         raise SheetError("File bukan .xlsx. Simpan ulang file master sebagai .xlsx (Excel Workbook).")
     wb = load_workbook(io.BytesIO(raw), data_only=True)
-    return {ws.title.strip(): [list(r) for r in ws.iter_rows(values_only=True)] for ws in wb.worksheets}
+    sheets = {}
+    for ws in wb.worksheets:
+        is_bank = ws.title.strip().lower() == SHEET_NAMES["bank"].lower()
+        rows = []
+        for row in ws.iter_rows():
+            vals = []
+            for c in row:
+                v = c.value
+                # Di tab BANK sel berformat persen (mis. 0%) dibaca sebagai teks "0%", bukan angka 0 (= tidak tersedia).
+                if is_bank and isinstance(v, (int, float)) and not isinstance(v, bool) and "%" in (c.number_format or ""):
+                    v = f"{v * 100:g}%"
+                vals.append(v)
+            rows.append(vals)
+        sheets[ws.title.strip()] = rows
+    return sheets
 
 
 # --------------------------------------------------------------------------- parsers
@@ -431,13 +455,37 @@ def period_end(period, today):
         return None
 
 
-def parse_promos(rows, today):
-    hi = None
-    need = ["promo", "periode", "bank", "scheme", "minimal amount", "maximal amount"]
+def normalize_scheme(raw):
+    low = text(raw).lower()
+    if "direct" in low or "potong" in low:
+        return "Direct Discount"
+    if "cashback" in low or "billing" in low or re.match(r"^cb\b", low):
+        return "CB by Billing"
+    return text(raw)
+
+
+PROMO_COLS = {
+    "promo": ("promo", "nama promo"),
+    "period": ("periode", "period"),
+    "bank": ("bank",),
+    "scheme": ("scheme", "skema"),
+    "min": ("minimal amount", "minimum amount", "min amount", "minimal", "min"),
+    "max": ("maximal amount", "maksimal amount", "maximum amount", "max amount", "maksimal", "max"),
+}
+
+
+def parse_promos(rows, today, warnings=None):
+    hi, idx = None, {}
     for r in range(min(len(rows), 6)):
         h = [hdr(v) for v in rows[r]]
-        if all(n in h for n in need):
-            hi = r
+        found = {}
+        for key, names in PROMO_COLS.items():
+            i = next((h.index(n) for n in names if n in h), -1)
+            if i < 0:
+                break
+            found[key] = i
+        else:
+            hi, idx = r, found
             break
     if hi is None:
         raise SheetError(
@@ -445,41 +493,107 @@ def parse_promos(rows, today):
             "Minimal Amount, Maximal Amount, Discount/Cashback."
         )
     h = [hdr(v) for v in rows[hi]]
-    ip, ipe, ib, isch = h.index("promo"), h.index("periode"), h.index("bank"), h.index("scheme")
-    imin, imax = h.index("minimal amount"), h.index("maximal amount")
-    idisc = next((i for i, x in enumerate(h) if x.startswith("discount")), -1)
+    idisc = next((i for i, x in enumerate(h) if x.startswith(("discount", "cashback", "diskon"))), -1)
     if idisc < 0:
         raise SheetError("Kolom 'Discount/Cashback' tidak ditemukan di sheet Promo Berjalan.")
-    out, carry = [], ""
+    out, carry, unknown = [], "", set()
     for row in rows[hi + 1:]:
-        promo, period = text(cell(row, ip)), text(cell(row, ipe)) or carry
-        bank, scheme = text(cell(row, ib)), text(cell(row, isch))
-        if text(cell(row, ipe)):
-            carry = text(cell(row, ipe))
+        promo, period = text(cell(row, idx["promo"])), text(cell(row, idx["period"])) or carry
+        bank, scheme = text(cell(row, idx["bank"])), normalize_scheme(cell(row, idx["scheme"]))
+        if text(cell(row, idx["period"])):
+            carry = text(cell(row, idx["period"]))
         if not promo or not bank or not scheme:
             continue
+        if scheme not in ("Direct Discount", "CB by Billing"):
+            unknown.add(scheme)
         end = period_end(period, today)
         out.append({
             "promo": promo, "period": period, "bank": bank, "scheme": scheme,
-            "min": num(cell(row, imin)), "max": num(cell(row, imax)), "discount": num(cell(row, idisc)),
+            "min": num(cell(row, idx["min"])), "max": num(cell(row, idx["max"])), "discount": num(cell(row, idisc)),
             "end_date": end.isoformat() if end else None,
         })
+    if unknown and warnings is not None:
+        warnings.append(f"Scheme promo tidak dikenali (ditampilkan tanpa potongan): {sorted(unknown)}. Gunakan 'Direct Discount' atau 'CB by Billing'.")
     return out
 
 
-def build_card_options(promos, warnings):
-    cards = [{"name": n, "tenors": t} for n, t in CARD_MATRIX]
-    known = {normalize_bank(c["name"]) for c in cards}
-    for p in promos:
-        k = normalize_bank(p["bank"])
-        if k not in known:
-            known.add(k)
-            cards.append({"name": p["bank"], "tenors": list(DEFAULT_NEW_CARD_TENORS)})
-            warnings.append(
-                f"Bank '{p['bank']}' ada di sheet Promo tapi belum ada di CARD_MATRIX -> ditambahkan otomatis "
-                f"dengan tenor {DEFAULT_NEW_CARD_TENORS}. Cek tenornya di sync_onedrive.py."
-            )
-    return cards
+NEG_MARKS = {"-", "–", "—", "x", "×", "✗", "✕", "tidak", "no", "n/a", "na", "false", "n", "none", "null"}
+BANK_HEADERS = {"bank", "nama bank", "banks", "bank name"}
+_PURE_TENOR = re.compile(r"(\d{1,2})\s*(x|bln|bulan|months?|mo|kali)?")
+
+
+def bank_tenor(head, v):
+    """Tenor (bulan) yang diwakili sel kolom C-G tab BANK; 0 bila tidak tersedia.
+
+    - Header angka ("3", "12 bulan"): sel berisi tanda apa pun (centang, Y, 0%, 1) = tenor itu tersedia; kosong / "-" / 0 = tidak.
+    - Header bukan angka ("Tenor 1"): angka di dalam sel (3, 6, 12 ...) adalah tenornya.
+    """
+    if v is None or v == "":
+        return 0
+    s = text(v).lower()
+    if s in NEG_MARKS:
+        return 0
+    isnum = isinstance(v, (int, float)) and not isinstance(v, bool)
+    pure = _PURE_TENOR.fullmatch(head.strip().lower())
+    if pure:
+        return 0 if (isnum and v == 0) else int(pure.group(1))
+    if isnum and float(v).is_integer() and 1 <= v <= 60:
+        return int(v)
+    m = re.fullmatch(r"\D*?(\d{1,2})\s*(x|bln|bulan|months?|mo|kali)?\D*", s)
+    if m and not s.endswith("%") and 1 <= int(m.group(1)) <= 60:
+        return int(m.group(1))
+    loose = re.search(r"(\d{1,2})", head)
+    return int(loose.group(1)) if loose else 0
+
+
+def parse_bank(rows):
+    """Tab BANK: kolom A = nama bank, kolom C-G = tenor cicilan kartu kredit."""
+    if not rows:
+        return []
+    hi = 0
+    for r in range(min(6, len(rows))):
+        if norm_ws(cell(rows[r], 0)).lower() in BANK_HEADERS:
+            hi = r
+            break
+    heads = {c: norm_ws(cell(rows[hi], c)) for c in range(2, 7)}
+    out, index = [], {}
+    for row in rows[hi + 1:]:
+        name = text(cell(row, 0))
+        if not name or name.lower() in BANK_HEADERS:
+            continue
+        tenors = {t for t in (bank_tenor(heads[c], cell(row, c)) for c in range(2, 7)) if t}
+        key = normalize_bank(name)
+        if key in index:
+            index[key]["tenors"] = sorted(set(index[key]["tenors"]) | tenors)
+            continue
+        rec = {"name": name, "tenors": sorted(tenors)}
+        index[key] = rec
+        out.append(rec)
+    return out
+
+
+def promo_bank_key(name):
+    return normalize_bank(re.sub(r"(?i)debit", "", text(name)))
+
+
+def build_banks(rows, promos, warnings):
+    """card_options (kartu kredit + tenor) dan debit_options dari tab BANK; fallback ke CARD_MATRIX bila tab tidak ada."""
+    if rows is None:
+        warnings.append("Tab 'BANK' tidak ditemukan -> memakai daftar bank bawaan (CARD_MATRIX). Tambahkan tab BANK agar daftar bank & tenor mengikuti sheet.")
+        banks, source = [{"name": n, "tenors": list(t)} for n, t in CARD_MATRIX], "fallback"
+    else:
+        banks, source = parse_bank(rows), "sheet"
+        if not banks:
+            raise SheetError("Tab 'BANK' kosong: isi nama bank di kolom A dan tenor di kolom C-G.")
+        if not any(b["tenors"] for b in banks):
+            warnings.append("Tab BANK: tidak ada tenor yang terbaca dari kolom C-G. Cek header kolom (mis. 3, 6, 12, 18, 24) dan tanda di sel.")
+        for b in banks:
+            print(f"::notice::BANK {b['name']}: tenor {', '.join(map(str, b['tenors'])) if b['tenors'] else '(tanpa cicilan, hanya debit)'}")
+    keys = {normalize_bank(b["name"]) for b in banks}
+    missing = sorted({p["bank"] for p in promos if promo_bank_key(p["bank"]) not in keys})
+    if missing:
+        warnings.append(f"Bank di tab Promo Berjalan yang tidak ada di tab BANK (promonya tidak bisa dipilih): {missing}")
+    return banks, [{"name": b["name"]} for b in banks], source
 
 
 # --------------------------------------------------------------------------- build
@@ -501,32 +615,40 @@ def find_label_collisions(catalog):
 
 
 def build(sheets, today, source_name, warnings):
-    for key, name in SHEET_NAMES.items():
-        if name not in sheets:
-            raise SheetError(f"Sheet '{name}' tidak ditemukan. Sheet yang ada: {', '.join(sheets)}")
-    catalog = parse_price_list(sheets[SHEET_NAMES["price"]])
-    promos_all = parse_promos(sheets[SHEET_NAMES["promo"]], today)
+    def get(key):
+        rows = find_sheet(sheets, SHEET_NAMES[key])
+        if rows is None and key in REQUIRED_SHEETS:
+            raise SheetError(f"Sheet '{SHEET_NAMES[key]}' tidak ditemukan. Sheet yang ada: {', '.join(sheets)}")
+        return rows
+
+    catalog = parse_price_list(get("price"))
+    promos_all = parse_promos(get("promo"), today, warnings)
     promos = [p for p in promos_all if not any(k in p["promo"].lower() for k in IGNORE_PROMO_KEYWORDS)]
     ignored = len(promos_all) - len(promos)
     if ignored:
         warnings.append(f"{ignored} promo diabaikan karena nama promo memuat kata {IGNORE_PROMO_KEYWORDS}.")
+    banks, debit, bank_source = build_banks(get("bank"), promos, warnings)
     data = {
         "source_file": source_name,
         "catalog": catalog,
-        "bnpl": parse_bnpl(sheets[SHEET_NAMES["bnpl"]]),
-        "providers": parse_catalog(sheets[SHEET_NAMES["provider"]]),
-        "qoala": parse_qoala(sheets[SHEET_NAMES["qoala"]]),
-        "trade_in": parse_trade_in(sheets[SHEET_NAMES["trade"]]),
-        "card_options": build_card_options(promos, warnings),
+        "bnpl": parse_bnpl(get("bnpl")),
+        "providers": parse_catalog(get("provider")),
+        "qoala": parse_qoala(get("qoala")),
+        "trade_in": parse_trade_in(get("trade")),
+        "card_options": banks,
+        "debit_options": debit,
+        "bank_source": bank_source,
         "promos": promos,
     }
     # Pengaman: jangan publish data kosong/rusak.
     for tab, items in catalog.items():
         if not items:
             raise SheetError(f"Katalog '{tab}' kosong setelah parsing. Cek kolom Category di sheet Price List.")
-    for key in ("bnpl", "providers", "qoala", "trade_in", "promos"):
+    for key in ("bnpl", "providers", "qoala", "trade_in"):
         if not data[key]:
             raise SheetError(f"Data '{key}' kosong setelah parsing.")
+    if not promos:
+        warnings.append("Tidak ada promo bank di tab Promo Berjalan (kalkulator menampilkan 'tidak ada promo').")
     collisions = find_label_collisions(catalog)
     if collisions:
         warnings.append(

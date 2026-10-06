@@ -398,6 +398,18 @@ details.dt .dc li{margin:3px 0}
 .modal-card h3{margin:0;font-size:19px;letter-spacing:-.4px}
 .modal-card p{margin:5px 0 14px;font-size:12.5px;line-height:1.55;color:var(--muted)}
 .modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+
+/* ===== v5 ===== */
+.edcnote{display:flex;gap:12px;align-items:flex-start;margin-top:12px;padding:12px 14px;border-radius:18px;background:var(--soft);border:1px solid var(--soft-line)}
+.edcnote .edic{flex:none;width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:var(--accent);color:#fff;box-shadow:0 6px 14px rgba(0,122,255,.3)}
+.edcnote .edic svg{width:18px;height:18px}
+.edcnote .edt{font-size:10.5px;font-weight:750;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+.edcnote .edv{font-size:15.5px;font-weight:800;margin-top:2px;letter-spacing:-.2px}
+.edcnote .eds{font-size:11.5px;line-height:1.5;color:var(--muted);margin-top:4px}
+.edcnote .warn{color:#c77700;font-weight:700}
+:root[data-theme="dark"] .edcnote .warn{color:#ffb340}
+.edcT thead td{font-size:10.5px;font-weight:750;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.edcT td{vertical-align:top}.edcT .mut{color:var(--muted);font-weight:500}
 </style>
 </head>
 <body>
@@ -470,7 +482,7 @@ details.dt .dc li{margin:3px 0}
   <details class="dt"><summary><span class="nn">2</span>Trade In</summary><div class="dc"><p>Pilih <b>Merk HP</b>, <b>Tipe HP</b>, lalu <b>Grade &amp; Harga</b>. Nilai trade in otomatis mengurangi harga device. Biarkan kosong bila customer tidak trade in.</p><div class="tip"><b>Tips:</b> pilih grade sesuai hasil pengecekan kondisi unit, bukan perkiraan. Nilai tiap grade berbeda untuk setiap model.</div></div></details>
   <details class="dt"><summary><span class="nn">3</span>Qoala Protection</summary><div class="dc"><p>Daftar tier otomatis dibatasi sesuai <b>range harga device</b>, sehingga hanya tier yang cocok yang tampil. Pilih tier dan tenor proteksi; biayanya ditambahkan ke total.</p></div></details>
   <details class="dt"><summary><span class="nn">4</span>Provider</summary><div class="dc"><p>Pilih <b>brand</b> provider, lalu <b>Paket</b>. Harga paket ditambahkan ke total bayar. Lewati bila customer tidak mengambil paket provider.</p></div></details>
-  <details class="dt"><summary><span class="nn">5</span>Metode Pembayaran</summary><div class="dc"><p>Pilih salah satu dari tiga metode:</p><ul><li><b>Financing</b>: pilih penyedia, <b>Tenor</b>, <b>DP</b>, dan <b>Biaya Admin</b>. Cicilan dihitung dari harga device dikurangi trade in dan DP, dibagi tenor.</li><li><b>Kartu Kredit</b>: pilih bank, lalu tenor cicilan 0% yang tersedia untuk bank itu. Daftar bank dan tenor mengikuti tab <b>BANK</b> di file master.</li><li><b>Kartu Debit</b>: pilih bank. Kartu debit <b>dibayar penuh langsung</b>, tanpa pembagian cicilan, sehingga yang tampil adalah total bayar.</li></ul></div></details>
+  <details class="dt"><summary><span class="nn">5</span>Metode Pembayaran</summary><div class="dc"><p>Pilih salah satu dari tiga metode:</p><ul><li><b>Financing</b>: pilih penyedia, <b>Tenor</b>, <b>DP</b>, dan <b>Biaya Admin</b>. Cicilan dihitung dari harga device dikurangi trade in dan DP, dibagi tenor.</li><li><b>Kartu Kredit</b>: pilih bank, lalu tenor cicilan 0%. Bank dan tenor yang tampil hanya yang berstatus aktif (<b>status_aktif = 1</b>) di tab <b>BANK</b>. Setelah bank dan tenor dipilih muncul petunjuk <b>Gesek di EDC</b> (sesuai kolom <b>edc_type</b>) dan, bila ada, minimum transaksi.</li><li><b>Kartu Debit</b>: pilih bank. Kartu debit <b>dibayar penuh langsung</b>, tanpa pembagian cicilan, sehingga yang tampil adalah total bayar. Petunjuk <b>Gesek di EDC</b> juga ditampilkan untuk bank tersebut.</li></ul></div></details>
   <details class="dt"><summary><span class="nn">6</span>Promo</summary><div class="dc"><p>Aktif setelah memilih <b>Kartu Kredit</b> atau <b>Kartu Debit</b>. Daftar hanya memuat promo bank yang <b>sesuai kartu terpilih</b>, yang <b>Purchase Amount</b>-nya (harga device promo) ada di antara batas minimal dan maksimal promo, dan yang periodenya belum berakhir. Data promo selalu mengikuti tab <b>Promo Berjalan</b>.</p><p>Tiap promo ditampilkan sebagai: <b>promo • bank • scheme • nominal diskon/cashback • periode</b>. Ketuk satu promo untuk memilihnya.</p><ul><li><b>Direct Discount</b>: langsung memotong harga device. Rinciannya terlihat di Rincian Simulasi (potongan dan harga device setelah promo bank), dan cicilan ikut turun.</li><li><b>CB by Billing</b>: tetap dirinci di simulasi tetapi <b>tidak memotong</b> pembayaran. Cashback diberikan bank kepada customer <b>minimal 3 bulan setelah periode promo berakhir</b>.</li></ul><div class="tip"><b>Catatan:</b> Financing tidak menampilkan promo bank. Promo Samsung sengaja tidak dihitung di kalkulator ini.</div></div></details>
   <details class="dt"><summary><span class="nn">7</span>Rincian Simulasi &amp; Sales Talk</summary><div class="dc"><p>Rincian Simulasi (kolom kanan di desktop, kartu biru di ponsel) merangkum seluruh komponen. <b>Saran Sales Talk</b> tersusun otomatis dari pilihan Anda.</p><ul><li><b>COPY SALES TALK</b>: menyalin teks sales talk.</li><li><b>BAGIKAN</b>: membuka menu bagikan berisi ringkasan lengkap (device, harga, trade in, metode, promo, total).</li></ul></div></details>
  </div>
@@ -493,10 +505,13 @@ details.dt .dc li{margin:3px 0}
   <div class="bl"><div class="bi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4.5V11h-6.5"/></svg></div><div><b>Refresh (↻)</b><p>Memuat data terbaru ke kalkulator. Jika belum berubah, tunggu sebentar (situs bisa butuh hingga 1 menit) lalu tap lagi.</p></div></div>
   <div class="bl"><div class="bi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2"/></svg></div><div><b>Tampilan &amp; Getaran</b><p>Pilih Auto, Terang, atau Gelap di sidebar. Getaran bisa dimatikan kapan saja.</p></div></div>
  </div>
+ <div class="h2"><i></i>Referensi EDC per bank</div>
+ <div class="card" id="edcRef"></div>
  <div class="h2"><i></i>Pertanyaan umum</div>
  <div>
   <details class="dt"><summary>Harga atau promo belum berubah setelah file master diedit</summary><div class="dc"><p>Tap <b>Run</b>, tunggu hitung mundur selesai, lalu tap <b>Refresh</b>. Bila masih sama, tunggu ±1 menit dan Refresh lagi. Pastikan file master sudah tersimpan.</p></div></details>
   <details class="dt"><summary>Promo bank tidak muncul</summary><div class="dc"><ul><li>Pilih metode <b>Kartu Kredit</b> atau <b>Kartu Debit</b> lalu pilih banknya.</li><li>Cek <b>Purchase Amount</b> berada di antara batas minimal dan maksimal promo.</li><li>Periode promo mungkin sudah berakhir (otomatis disembunyikan).</li><li>Promo kartu debit hanya tampil untuk Kartu Debit, dan sebaliknya.</li></ul></div></details>
+  <details class="dt"><summary>Kartu harus digesek di EDC mana?</summary><div class="dc"><p>Pilih bank dan tenor di langkah 5. Kotak <b>Gesek di EDC</b> menunjukkan EDC yang harus dipakai (acuan kolom <b>edc_type</b> di tab BANK). Daftar lengkap per bank ada di bagian <b>Referensi EDC per bank</b> di halaman ini. Bila dua EDC ditampilkan, pilih salah satu.</p></div></details>
   <details class="dt"><summary>Kenapa tiba-tiba keluar (logout)?</summary><div class="dc"><p>Sesi staff otomatis berakhir bila tidak ada aktivitas selama 15 menit. Login kembali dengan password staff.</p></div></details>
   <details class="dt"><summary>Tombol Run meminta password</summary><div class="dc"><p>Run hanya boleh dijalankan admin, jadi setiap tap Run meminta password admin.</p></div></details>
   <details class="dt"><summary>Harga device berbeda dengan yang saya harapkan</summary><div class="dc"><p>Buka dropdown <b>Varian / Warna</b> dan pilih unit yang tepat. Satu tipe bisa punya beberapa baris dengan harga berbeda.</p></div></details>
@@ -955,7 +970,7 @@ function showPage(p){
   $i('actions').classList.toggle('off-home',p!=='home');
   document.querySelectorAll('.sb-item[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===p));
   const t=p==='home'?$i('app'):$i('page-'+p);t.classList.remove('enter');void t.offsetWidth;t.classList.add('enter');
-  if(p==='about')renderAbout();if(p==='admin')renderAdmin();
+  if(p==='about')renderAbout();if(p==='admin')renderAdmin();if(p==='guide')renderEdcRef();
   window.scrollTo(0,0);
 }
 function renderAbout(){
@@ -1079,8 +1094,8 @@ function payStepHtml(q,fin,card){
   const pm=state.payment,tb=(m,l)=>`<button class="paybtn ${pm===m?'active':''}" onclick="setPayment('${m}')">${l}</button>`;
   let body='';
   if(pm==='financing')body=`<div class="grid" style="margin-top:11px"><div class="field full"><label class="label">Financing</label><select class="control" onchange="state.financing=this.value;const z=DATA.bnpl.find(x=>x.name===this.value);state.tenor=z?.tenors?.[0]||3;state.promo='';autoQoala();render()">${options(DATA.bnpl.map(x=>({value:x.name,label:x.name})),state.financing,'Pilih financing…')}</select></div><div class="field"><label class="label">DP</label><input class="control" inputmode="numeric" value="${state.dp||''}" placeholder="0" oninput="state.dp=this.value;refreshSummary()"></div><div class="field"><label class="label">Biaya Admin</label><input class="control" inputmode="numeric" value="${state.admin||''}" placeholder="0" oninput="state.admin=this.value;refreshSummary()"></div><div class="field"><label class="label">Tenor</label><select class="control" onchange="state.tenor=Number(this.value);state.promo='';autoQoala();render()">${options((fin?.tenors||[3,6,12]).map(x=>({value:x,label:x+' bulan'})),state.tenor)}</select></div><div class="field"><label class="label">Estimasi Cicilan Device / bulan</label><input class="control" value="${IDR(q.monthly)}" readonly></div></div>`;
-  else if(pm==='card'){const banks=creditBanks();body=`<div class="grid" style="margin-top:11px"><div class="field full"><label class="label">Kartu Kredit</label><select class="control" onchange="pickCard(this.value)">${options(banks.map(x=>({value:x.name,label:x.name})),state.card,'Pilih kartu…')}</select></div><div class="field"><label class="label">Tenor</label><select class="control" onchange="state.tenor=Number(this.value);state.promo='';autoQoala();render()">${options(arr(card&&card.tenors).map(x=>({value:x,label:x+' bulan'})),state.tenor)}</select></div><div class="field"><label class="label">Estimasi Cicilan Device / bulan</label><input class="control" value="${IDR(q.monthly)}" readonly></div></div>${banks.length?'':'<div class="mini-note">Belum ada bank dengan tenor di tab BANK.</div>'}`}
-  else body=`<div class="grid" style="margin-top:11px"><div class="field full"><label class="label">Kartu Debit</label><select class="control" onchange="pickDebit(this.value)">${options(debitBanks().map(x=>({value:x.name,label:x.name})),state.card,'Pilih bank kartu debit…')}</select></div></div><div class="mini-note">Kartu debit dibayar <b>penuh langsung</b> (tanpa cicilan). Total yang dibayar: <b>${IDR(q.total)}</b>.</div>`;
+  else if(pm==='card'){const banks=creditBanks();body=`<div class="grid" style="margin-top:11px"><div class="field full"><label class="label">Kartu Kredit</label><select class="control" onchange="pickCard(this.value)">${options(banks.map(x=>({value:x.name,label:x.name})),state.card,'Pilih kartu…')}</select></div><div class="field"><label class="label">Tenor</label><select class="control" onchange="state.tenor=Number(this.value);state.promo='';autoQoala();render()">${options(arr(card&&card.tenors).map(x=>({value:x,label:x+' bulan'})),state.tenor)}</select></div><div class="field"><label class="label">Estimasi Cicilan Device / bulan</label><input class="control" value="${IDR(q.monthly)}" readonly></div></div>${edcNoteHtml(card,state.tenor,q)}${banks.length?'':'<div class="mini-note">Belum ada bank dengan tenor aktif di tab BANK.</div>'}`}
+  else body=`<div class="grid" style="margin-top:11px"><div class="field full"><label class="label">Kartu Debit</label><select class="control" onchange="pickDebit(this.value)">${options(debitBanks().map(x=>({value:x.name,label:x.name})),state.card,'Pilih bank kartu debit…')}</select></div></div>${edcNoteHtml(debitBanks().find(x=>x.name===state.card)||card,0,q)}<div class="mini-note">Kartu debit dibayar <b>penuh langsung</b> (tanpa cicilan). Total yang dibayar: <b>${IDR(q.total)}</b>.</div>`;
   return `<section class="card c-pay"><div class="section-head"><div class="step">5</div><div><div class="section-title">Metode Pembayaran</div><div class="section-sub">Pilih Financing, Kartu Kredit, atau Kartu Debit</div></div></div><div class="payrow p3">${tb('financing','Financing')}${tb('card','Kartu Kredit')}${tb('debit','Kartu Debit')}</div>${body}</section>`;
 }
 function promoStepHtml(q,promos){
@@ -1104,7 +1119,7 @@ function salesTalk(q){
   else L.push(`Kak, estimasi cicilannya kurang lebih ${IDR(q.monthlyAll)} per bulan dengan ${q.methodLabel}. Dengan angka tersebut, Kakak sudah mendapatkan ${p.description} dengan harga promo ${IDR(q.device)}.`);
   if(q.deviceDisc>0)L.push(`Harga normalnya ${IDR(q.normal)}, jadi sudah hemat ${IDR(q.deviceDisc)} dari promo device.`);
   if(q.trade)L.push(`Kalau Trade In ${fmtBrand(state.tradeBrand)} ${fmtName(state.tradeModel)} Grade ${state.tradeGrade}, ada tambahan pengurangan ${IDR(q.trade)}.`);
-  if(q.q)L.push(`Untuk proteksi, ada ${q.q.description} sebesar ${IDR(q.qTotal)}${q.qMonthly?` atau sekitar ${IDR(q.qMonthly)} per bulan`:''}.`);
+  if(q.q)L.push(`Untuk proteksi, Benefit All Risk ada ${q.q.description} sebesar ${IDR(q.qTotal)}${q.qMonthly?` atau sekitar ${IDR(q.qMonthly)} per bulan`:''}.`);
   if(q.prov)L.push(`Benefit provider ${q.prov.brand} ${q.prov.description} sebesar ${IDR(q.provTotal)}${q.provMonthly?` atau ${IDR(q.provMonthly)} per bulan`:''}.`);
   if(state.payment==='financing')L.push(`Pembayaran melalui ${state.financing||'Financing'} ${state.tenor} bulan, dengan DP ${IDR(q.upfront)} dan admin ${IDR(q.admin)}.`);
   else if(q.isDebit)L.push(`Pembayaran menggunakan kartu debit${state.card?' '+state.card:''}, dibayar penuh langsung tanpa cicilan.`);
@@ -1151,6 +1166,39 @@ async function confirmRun(){
   }catch(e){err.textContent=e.message||'Gagal memeriksa password.'}
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeRunModal()});
+
+/* ===== v5: petunjuk EDC (edc_type), minimum transaksi, referensi EDC ===== */
+const EDC_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18"/><path d="M7 15h4"/></svg>';
+function edcList(b,tenor){
+  if(!b)return [];
+  if(Array.isArray(b.edc))return b.edc;
+  if(tenor&&b.edc)return arr(b.edc[String(tenor)]);
+  return arr(b.edc_all);
+}
+function edcNoteHtml(b,tenor,q){
+  if(!b||!state.card)return '';
+  const list=edcList(b,tenor);
+  const mn=tenor&&b.min?Number(b.min[String(tenor)]||0):0;
+  const anyEdc=arr(DATA.card_options).some(x=>arr(x.edc_all).length)||arr(DATA.debit_options).some(x=>arr(x.edc).length);
+  if(!list.length&&!anyEdc&&!mn)return '';
+  const edc=list.length?`<div class="edt">Gesek di EDC</div><div class="edv">${list.map(esc).join(' / ')}</div>${list.length>1?'<div class="eds">Tersedia di lebih dari satu EDC; pilih salah satu.</div>':''}`:`<div class="edt">Gesek di EDC</div><div class="eds">Info EDC untuk kombinasi ini belum diisi di tab BANK (kolom edc_type).</div>`;
+  const min=mn?`<div class="eds">Minimum transaksi tenor ${tenor} bulan: <b>${IDR(mn)}</b>${q&&q.total&&q.total<mn?` — <span class="warn">total bayar saat ini ${IDR(q.total)} di bawah minimum</span>`:''}</div>`:'';
+  return `<div class="edcnote"><span class="edic">${EDC_ICON}</span><div>${edc}${min}</div></div>`;
+}
+function renderEdcRef(){
+  const box=$i('edcRef');if(!box)return;
+  if(!DATA){box.innerHTML='<div class="empty">Data belum dimuat.</div>';return}
+  const banks=arr(DATA.card_options);
+  if(!banks.some(b=>arr(b.edc_all).length)){box.innerHTML='<div class="empty">Informasi EDC belum tersedia. Isi kolom edc_type di tab BANK lalu jalankan Run.</div>';return}
+  const rows=banks.map(b=>{
+    const by={};Object.keys(b.edc||{}).sort((x,y)=>x-y).forEach(t=>arr(b.edc[t]).forEach(e=>{(by[e]=by[e]||[]).push(t)}));
+    const keys=Object.keys(by);
+    const credit=keys.length?keys.map(e=>`<div><b>${esc(e)}</b> <span class="mut">(${by[e].join(', ')} bln)</span></div>`).join(''):'<span class="mut">Tanpa cicilan</span>';
+    const debit=arr(b.edc_all).length?arr(b.edc_all).map(esc).join(' / '):'<span class="mut">—</span>';
+    return `<tr><td>${esc(b.name)}</td><td>${credit}</td><td>${debit}</td></tr>`;
+  }).join('');
+  box.innerHTML=`<div style="overflow-x:auto"><table class="tbl edcT"><thead><tr><td>Bank</td><td>Kartu Kredit (tenor aktif)</td><td>Kartu Debit</td></tr></thead><tbody>${rows}</tbody></table></div><div class="note">Sumber: tab BANK (edc_type). Hanya tenor dengan status_aktif = 1 yang ditampilkan.</div>`;
+}
 
 initApp();
 

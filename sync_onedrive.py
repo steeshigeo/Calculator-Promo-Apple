@@ -19,7 +19,7 @@ Port dari Code.gs (Apps Script) dengan perbaikan:
     - header sheet dibaca tanpa peduli huruf besar/kecil & spasi ganda ("Promotion   Price")
     - baris judul model = kolom A terisi, kolom B & C kosong (tahan sel nyasar)
     - label RAM/Storage Mac (16G/512GB, 24GB/1T, 16GB/256-IND, dst.)
-    - daftar bank + tenor kartu kredit dibaca dari tab BANK (kolom A = bank, C-G = tenor); CARD_MATRIX hanya cadangan
+    - daftar bank + tenor kartu kredit dibaca dari tab BANK (bank_name, tenor_bulan, status_aktif 1/0, edc_type, minimum_transaksi); format kolom lama masih didukung; CARD_MATRIX hanya cadangan
     - tiap promo diberi end_date (dibaca dari kolom Periode) supaya promo lewat tidak ditawarkan
 """
 import argparse
@@ -546,8 +546,97 @@ def bank_tenor(head, v):
     return int(loose.group(1)) if loose else 0
 
 
+BANK_LONG_COLS = {
+    "bank": ("bank name", "nama bank", "bank"),
+    "tenor": ("tenor bulan", "tenor (bulan)", "tenor"),
+    "status": ("status aktif", "status", "aktif", "active"),
+    "edc": ("edc type", "edc", "jenis edc", "tipe edc"),
+    "min": ("minimum transaksi", "minimal transaksi", "min transaksi", "minimum", "minimal"),
+}
+ACTIVE_TOKENS = {"1", "true", "ya", "y", "yes", "aktif", "active", "on", "✓", "v"}
+
+
+def _bk(v):
+    return norm_ws(v).lower().replace("_", " ")
+
+
+def find_bank_long_header(rows):
+    """Format baru tab BANK: edc_type | bank_name | tenor_bulan | status_aktif | minimum_transaksi (satu baris per bank + tenor)."""
+    for r in range(min(8, len(rows))):
+        h = [_bk(v) for v in rows[r]]
+        cols = {}
+        for key, names in BANK_LONG_COLS.items():
+            i = next((h.index(n) for n in names if n in h), -1)
+            if i >= 0:
+                cols[key] = i
+        if "bank" in cols and "tenor" in cols:
+            return r, cols
+    return None, None
+
+
+def _tenor_of(v):
+    if isinstance(v, (int, float)) and not isinstance(v, bool):
+        return int(v) if float(v).is_integer() and v > 0 else 0
+    m = re.search(r"(\d{1,2})", text(v))
+    return int(m.group(1)) if m else 0
+
+
+def _active_of(v):
+    if isinstance(v, (int, float)) and not isinstance(v, bool):
+        return v != 0
+    return text(v).lower() in ACTIVE_TOKENS
+
+
+def parse_bank_long(rows, hi, cols):
+    out, index = [], {}
+    for row in rows[hi + 1:]:
+        name = text(cell(row, cols["bank"]))
+        if not name:
+            continue
+        key = normalize_bank(name)
+        rec = index.get(key)
+        if rec is None:
+            rec = {"name": name, "_t": set(), "_edc": {}, "_min": {}, "_ea": set(), "_ex": set()}
+            index[key] = rec
+            out.append(rec)
+        tenor = _tenor_of(cell(row, cols["tenor"]))
+        active = _active_of(cell(row, cols["status"])) if "status" in cols else True
+        edc = text(cell(row, cols["edc"])) if "edc" in cols else ""
+        mn = num(cell(row, cols["min"])) if "min" in cols else 0
+        if edc:
+            rec["_ex"].add(edc)
+            if active:
+                rec["_ea"].add(edc)
+        if tenor > 0 and active:
+            rec["_t"].add(tenor)
+            if edc:
+                rec["_edc"].setdefault(tenor, set()).add(edc)
+            if mn:
+                rec["_min"][tenor] = min(rec["_min"].get(tenor, mn), mn)
+    banks = []
+    for r in out:
+        banks.append({
+            "name": r["name"],
+            "tenors": sorted(r["_t"]),
+            "edc": {str(t): sorted(v) for t, v in sorted(r["_edc"].items())},
+            "min": {str(t): v for t, v in sorted(r["_min"].items())},
+            "edc_all": sorted(r["_ea"] or r["_ex"]),
+        })
+    return banks
+
+
 def parse_bank(rows):
-    """Tab BANK: kolom A = nama bank, kolom C-G = tenor cicilan kartu kredit."""
+    """Tab BANK. Format baru (panjang): bank_name, tenor_bulan, status_aktif (1 = aktif, 0 = tidak), edc_type, minimum_transaksi.
+    Format lama (lebar): kolom A = bank, kolom C-G = tenor."""
+    if not rows:
+        return []
+    hi, cols = find_bank_long_header(rows)
+    if hi is not None:
+        return parse_bank_long(rows, hi, cols)
+    return parse_bank_wide(rows)
+
+
+def parse_bank_wide(rows):
     if not rows:
         return []
     hi = 0
@@ -586,14 +675,19 @@ def build_banks(rows, promos, warnings):
         if not banks:
             raise SheetError("Tab 'BANK' kosong: isi nama bank di kolom A dan tenor di kolom C-G.")
         if not any(b["tenors"] for b in banks):
-            warnings.append("Tab BANK: tidak ada tenor yang terbaca dari kolom C-G. Cek header kolom (mis. 3, 6, 12, 18, 24) dan tanda di sel.")
+            warnings.append("Tab BANK: tidak ada tenor aktif yang terbaca. Cek kolom bank_name, tenor_bulan, status_aktif (1 = aktif).")
         for b in banks:
-            print(f"::notice::BANK {b['name']}: tenor {', '.join(map(str, b['tenors'])) if b['tenors'] else '(tanpa cicilan, hanya debit)'}")
+            if b.get("edc"):
+                tl = ", ".join(f"{t} bln ({' / '.join(e) or '-'})" for t, e in b["edc"].items()) or "(tanpa cicilan aktif)"
+            else:
+                tl = ", ".join(map(str, b["tenors"])) if b["tenors"] else "(tanpa cicilan, hanya debit)"
+            dbg = f" | EDC: {' / '.join(b['edc_all'])}" if b.get("edc_all") else ""
+            print(f"::notice::BANK {b['name']}: tenor {tl}{dbg}")
     keys = {normalize_bank(b["name"]) for b in banks}
     missing = sorted({p["bank"] for p in promos if promo_bank_key(p["bank"]) not in keys})
     if missing:
         warnings.append(f"Bank di tab Promo Berjalan yang tidak ada di tab BANK (promonya tidak bisa dipilih): {missing}")
-    return banks, [{"name": b["name"]} for b in banks], source
+    return banks, [{"name": b["name"], "edc": b.get("edc_all", [])} for b in banks], source
 
 
 # --------------------------------------------------------------------------- build

@@ -410,6 +410,12 @@ details.dt .dc li{margin:3px 0}
 :root[data-theme="dark"] .edcnote .warn{color:#ffb340}
 .edcT thead td{font-size:10.5px;font-weight:750;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);white-space:nowrap}
 .edcT td{vertical-align:top}.edcT .mut{color:var(--muted);font-weight:500}
+
+/* sidebar: seluruh isi satu alur scroll agar kartu Pengaturan tidak terpotong oleh Credits */
+.sidebar{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.sidebar::-webkit-scrollbar{display:none}
+.sidebar .sb-scroll{flex:none;overflow:visible;margin:0;padding:0}
+.sidebar .sb-foot{flex:none;margin-top:auto;padding-top:18px}
 </style>
 </head>
 <body>
